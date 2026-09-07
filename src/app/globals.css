@@ -1,26 +1,129 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-cream: #faf7f2;
+  --color-blush: #fdf2f4;
+  --color-rose-50: #fdf2f5;
+  --color-rose-100: #fce7ec;
+  --color-rose-200: #f9cfda;
+  --color-rose-300: #f4a8bc;
+  --color-rose-400: #ec7b99;
+  --color-rose-500: #e04e79;
+  --color-rose-600: #c9315e;
+  --color-rose-700: #a8234c;
+  --color-rose-800: #8c2141;
+  --color-rose-900: #771f39;
+  --color-sage-100: #eef0e6;
+  --color-sage-200: #dde1cc;
+  --color-sage-500: #8a9a5b;
+  --color-sage-600: #6d7c44;
+  --color-ink: #2d2229;
+  --color-plum: #57454f;
+  --font-display: var(--font-playfair);
+  --font-body: var(--font-cormorant-garamond);
+  --font-sans: var(--font-cormorant-garamond);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-cormorant-garamond), Georgia, serif;
+  font-size: 17px;
+}
+
+.font-display {
+  font-family: var(--font-playfair), Georgia, serif;
+}
+
+::selection {
+  background: var(--color-rose-200);
+  color: var(--color-ink);
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.6s ease-out both;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    110deg,
+    var(--color-rose-100) 8%,
+    #fff 18%,
+    var(--color-rose-100) 33%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+.petal-divider {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--color-rose-200),
+    transparent
+  );
+}
+
+.card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -16px rgba(137, 47, 74, 0.18);
+}
+
+input,
+select,
+textarea {
+  outline: none;
+}
+
+.field {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-rose-200);
+  background: #fff;
+  padding: 0.625rem 0.875rem;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.field:focus {
+  border-color: var(--color-rose-400);
+  box-shadow: 0 0 0 3px rgba(236, 123, 153, 0.15);
+}
+
+.label {
+  display: block;
+  margin-bottom: 0.375rem;
+  font-size: 0.875rem;
+  letter-spacing: 0.02em;
+  color: var(--color-plum);
+  font-weight: 600;
 }
