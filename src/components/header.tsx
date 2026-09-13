@@ -69,7 +69,7 @@ export function Header() {
     router.refresh();
   };
 
-  const isAdmin = !!user?.email && !user.email.endsWith("@phone.arkaira.in");
+  const isAdmin = !!user?.email && !user.email.endsWith("@phone.arkiara.in");
 
   return (
     <header className="sticky top-0 z-50">
@@ -113,7 +113,7 @@ export function Header() {
               <Flower2 className="h-4.5 w-4.5" />
             </span>
             <span className="font-display text-lg font-bold tracking-tight text-ink">
-              Arkaira
+              Arkiara
             </span>
           </Link>
 
@@ -166,7 +166,7 @@ export function Header() {
                           Signed in
                         </p>
                         <p className="mt-0.5 truncate text-[14px] font-semibold text-ink">
-                          {user.email?.replace("@phone.arkaira.in", "") ??
+                          {user.email?.replace("@phone.arkiara.in", "") ??
                             user.phone ??
                             "Customer"}
                         </p>

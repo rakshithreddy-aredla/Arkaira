@@ -223,7 +223,7 @@ export default async function HomePage() {
       <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <Reveal className="max-w-xl">
           <span className="eyebrow">
-            <Zap className="h-3.5 w-3.5" /> Why Arkaira
+            <Zap className="h-3.5 w-3.5" /> Why Arkiara
           </span>
           <h2 className="mt-4 font-display text-4xl font-bold tracking-tight text-ink sm:text-5xl">
             Built like a product,

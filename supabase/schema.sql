@@ -1,5 +1,5 @@
 -- ============================================================
--- ARKAIRA – Flower E-commerce Database Schema (Supabase)
+-- ARKIARA – Flower E-commerce Database Schema (Supabase)
 -- Run this ENTIRE file in: Supabase Dashboard → SQL Editor
 -- ============================================================
 
@@ -96,7 +96,7 @@ create policy "Public insert queries" on public.decoration_queries for insert wi
 -- ---------- ADMIN helper ----------
 -- Admins are identified by email allow-list (env ADMIN_EMAILS on the server).
 -- Phone-only customer accounts (created via the /login portal) have an
--- @phone.arkaira.in synthetic email and never match the allow-list, so they
+-- @phone.arkiara.in synthetic email and never match the allow-list, so they
 -- are rejected here even though Supabase treats them as "authenticated".
 create or replace function public.is_admin()
 returns boolean
@@ -106,8 +106,8 @@ as $$
   select exists (
     select 1 from auth.users u
      where u.id = auth.uid()
-       and u.email like '%@arkaira.in'
-       and u.email not like '%@phone.arkaira.in'
+       and u.email like '%@arkiara.in'
+       and u.email not like '%@phone.arkiara.in'
        and u.phone is null
   );
 $$;

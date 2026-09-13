@@ -16,8 +16,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "Arkaira — Fresh Flowers, Delivered with Love",
-    template: "%s | Arkaira",
+    default: "Arkiara — Fresh Flowers, Delivered with Love",
+    template: "%s | Arkiara",
   },
   description:
     "Premium hand-tied bouquets and floral arrangements for every occasion. Order online, delivered fresh to your doorstep. Decoration enquiries welcome.",

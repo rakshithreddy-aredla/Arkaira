@@ -122,7 +122,7 @@ export function LoginClient() {
       if (error) throw error;
 
       if (data.session) {
-        toast("Welcome to Arkaira!");
+        toast("Welcome to Arkiara!");
         redirectAfterLogin();
       } else {
         toast("Account created — sign in with your password");
@@ -170,7 +170,7 @@ export function LoginClient() {
               <Flower2 className="h-4.5 w-4.5" />
             </span>
             <span className="font-display text-lg font-bold tracking-tight text-white">
-              Arkaira
+              Arkiara
             </span>
           </Link>
 
@@ -218,7 +218,7 @@ export function LoginClient() {
           </div>
 
           <p className="text-[11px] uppercase tracking-[0.18em] text-white/30">
-            Fresh flowers · Same-day delivery · arkaira.in
+            Fresh flowers · Same-day delivery · arkiara.in
           </p>
         </div>
       </div>

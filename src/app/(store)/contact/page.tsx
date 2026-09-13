@@ -17,9 +17,9 @@ const cards = [
   {
     icon: Mail,
     title: "Email",
-    main: "hello@arkaira.in",
+    main: "hello@arkiara.in",
     sub: "We reply within one business day",
-    href: "mailto:hello@arkaira.in",
+    href: "mailto:hello@arkiara.in",
   },
   {
     icon: Clock,
@@ -30,7 +30,7 @@ const cards = [
   {
     icon: MapPin,
     title: "Studio",
-    main: "Arkaira Floral Studio",
+    main: "Arkiara Floral Studio",
     sub: "(Update with your full address)",
   },
 ];

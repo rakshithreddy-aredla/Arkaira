@@ -1,6 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 
-export const SYNTHETIC_SUFFIX = "@phone.arkaira.in";
+export const SYNTHETIC_SUFFIX = "@phone.arkiara.in";
 
 export function syntheticEmail(digits: string): string {
   return `${digits}${SYNTHETIC_SUFFIX}`;
@@ -22,7 +22,7 @@ export function getAccountPhone(
   if (user.phone) return user.phone.replace(/\D/g, "").slice(-10);
   const meta = user.user_metadata as { phone?: string } | undefined;
   if (meta?.phone) return meta.phone.replace(/\D/g, "").slice(-10);
-  const match = (user.email ?? "").match(/^(\d{10})@phone\.arkaira\.in$/);
+  const match = (user.email ?? "").match(/^(\d{10})@phone\.arkiara\.in$/);
   if (match) return match[1];
   return "";
 }

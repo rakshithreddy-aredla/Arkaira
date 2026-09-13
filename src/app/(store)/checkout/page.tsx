@@ -47,7 +47,7 @@ export default function CheckoutPage() {
         phone:
           f.phone ||
           (user.user_metadata?.phone as string) ||
-          (user.email ?? "").replace("@phone.arkaira.in", ""),
+          (user.email ?? "").replace("@phone.arkiara.in", ""),
         email: f.email || (user.email?.includes("@phone.") ? "" : user.email) || "",
       }));
     }, 0);
@@ -128,7 +128,7 @@ export default function CheckoutPage() {
         key: keyId,
         amount: razorpayOrder.amount,
         currency: "INR",
-        name: "Arkaira",
+        name: "Arkiara",
         description: `Order ${result.order_number}`,
         order_id: razorpayOrder.id,
         prefill: {

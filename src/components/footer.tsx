@@ -35,7 +35,7 @@ export function Footer() {
               <Flower2 className="h-5 w-5" />
             </span>
             <span className="font-display text-xl font-bold tracking-tight text-white">
-              Arkaira
+              Arkiara
             </span>
           </div>
           <Link href="/shop" className="btn-onDark">
@@ -56,7 +56,7 @@ export function Footer() {
           <p className="mt-4 max-w-sm text-[14px] leading-relaxed">
             Real-time inventory, atomic checkout, live order tracking. The
             most reliable way to send flowers in the city — powered by
-            Arkaira.
+            Arkiara.
           </p>
           <div className="mt-6 flex gap-2">
             <a
@@ -119,13 +119,13 @@ export function Footer() {
               <Phone className="h-3.5 w-3.5" /> +91 98765 43210
             </li>
             <li className="flex items-center gap-2 text-white/60">
-              <Mail className="h-3.5 w-3.5" /> hello@arkaira.in
+              <Mail className="h-3.5 w-3.5" /> hello@arkiara.in
             </li>
             <li className="flex items-center gap-2 text-white/60">
               <Clock className="h-3.5 w-3.5" /> Mon–Sun, 8 AM–8 PM
             </li>
             <li className="flex items-center gap-2 text-white/60">
-              <MapPin className="h-3.5 w-3.5" /> Arkaira Floral Studio
+              <MapPin className="h-3.5 w-3.5" /> Arkiara Floral Studio
             </li>
           </ul>
         </div>
@@ -151,8 +151,8 @@ export function Footer() {
 
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 py-5 text-xs text-white/40 sm:flex-row sm:px-6">
-          <span>© {new Date().getFullYear()} Arkaira. All rights reserved.</span>
-          <span>Payments secured by Razorpay · arkaira.in</span>
+          <span>© {new Date().getFullYear()} Arkiara. All rights reserved.</span>
+          <span>Payments secured by Razorpay · arkiara.in</span>
         </div>
       </div>
     </footer>

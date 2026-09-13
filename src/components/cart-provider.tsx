@@ -36,7 +36,7 @@ export function useCart() {
   return ctx;
 }
 
-const STORAGE_KEY = "arkaira_cart_v1";
+const STORAGE_KEY = "arkiara_cart_v1";
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>([]);

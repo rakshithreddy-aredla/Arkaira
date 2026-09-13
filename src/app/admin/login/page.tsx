@@ -32,7 +32,7 @@ export default async function AdminLoginPage() {
             <Flower2 className="h-6 w-6" />
           </span>
           <h1 className="mt-5 font-display text-2xl font-bold tracking-tight text-white">
-            Arkaira Admin
+            Arkiara Admin
           </h1>
           <p className="mt-2 text-[13px] text-white/50">
             Sign in to manage the store

@@ -1,6 +1,6 @@
-# Arkaira — Flower E-commerce Store 🌸
+# Arkiara — Flower E-commerce Store 🌸
 
-An aesthetic, real-time online flower shop for **arkaira.in** with:
+An aesthetic, real-time online flower shop for **Arkiara.in** with:
 
 - **Live stock & prices** — inventory updates instantly on the storefront via Supabase Realtime (no page refresh)
 - **Online payments** — Razorpay checkout (UPI / Cards / Netbanking) settled directly to your bank account
@@ -26,7 +26,7 @@ An aesthetic, real-time online flower shop for **arkaira.in** with:
 ### 1 · Create a Supabase project
 
 1. Go to <https://supabase.com> → **New project**
-2. Choose a name (e.g. `arkaira`), a strong DB password, region **Mumbai**
+2. Choose a name (e.g. `Arkiara`), a strong DB password, region **Mumbai**
 3. When ready, open **SQL Editor → New query**, paste the entire contents of `supabase/schema.sql` and click **Run**
    - This creates tables, security rules, the atomic `place_order` function and 8 sample products
 
@@ -34,7 +34,7 @@ An aesthetic, real-time online flower shop for **arkaira.in** with:
 
 1. In Supabase, go to **Authentication → Users → Add user**
 2. Enter your email + a strong password, turn on **Auto Confirm User**
-3. This is the login you will use at `arkaira.in/admin`
+3. This is the login you will use at `Arkiara.in/admin`
 
 ### 3 · Get Razorpay keys
 
@@ -63,9 +63,9 @@ vercel --prod
 
 In the Vercel dashboard → your project → **Settings → Environment Variables**, add all five variables from `.env.local` (Production + Preview).
 
-### 6 · Connect your GoDaddy domain arkaira.in
+### 6 · Connect your GoDaddy domain Arkiara.in
 
-1. In Vercel: **Project → Settings → Domains → Add** → enter `arkaira.in`
+1. In Vercel: **Project → Settings → Domains → Add** → enter `Arkiara.in`
 2. Vercel shows you DNS records like this:
 
    | Type  | Name    | Value                       |
@@ -73,11 +73,11 @@ In the Vercel dashboard → your project → **Settings → Environment Variable
    | A     | `@`     | `76.76.21.21`               |
    | CNAME | `www`   | `cname.vercel-dns.com`      |
 
-3. In GoDaddy: **My Products → DNS → Manage Zones → arkaira.in**
+3. In GoDaddy: **My Products → DNS → Manage Zones → Arkiara.in**
    - Edit the **A** record (pointing to `@`) → change value to `76.76.21.21`
    - Edit the **CNAME** for `www` → change value to `cname.vercel-dns.com`
    - Delete any parked-domain A records GoDaddy added
-4. Wait 5–30 minutes (up to 24h worst case) for DNS to propagate — Vercel then issues a free SSL certificate automatically. Your site is live at **https://arkaira.in**
+4. Wait 5–30 minutes (up to 24h worst case) for DNS to propagate — Vercel then issues a free SSL certificate automatically. Your site is live at **https://Arkiara.in**
 
 ---
 
@@ -94,7 +94,7 @@ In the Vercel dashboard → your project → **Settings → Environment Variable
 ### Replacing sample content
 
 - **Product photos:** edit the `image_url` of each product in `/admin/products`, or update rows in Supabase → Table Editor → `products`. Any `https://…` image URL works.
-- **Phone number / email / address:** search for `+91 98765 43210`, `hello@arkaira.in` and the studio address in `src/components/footer.tsx`, `src/app/(store)/contact/page.tsx` and `src/app/(store)/order-success/page.tsx`, then replace with your own details.
+- **Phone number / email / address:** search for `+91 98765 43210`, `hello@Arkiara.in` and the studio address in `src/components/footer.tsx`, `src/app/(store)/contact/page.tsx` and `src/app/(store)/order-success/page.tsx`, then replace with your own details.
 - **Delivery fee / free-delivery threshold:** `src/lib/format.ts` (`DELIVERY_FEE`, `FREE_DELIVERY_ABOVE`) — and the matching logic inside the `place_order` function in `supabase/schema.sql`.
 
 ---

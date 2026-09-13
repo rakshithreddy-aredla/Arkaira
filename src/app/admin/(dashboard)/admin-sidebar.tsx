@@ -31,7 +31,7 @@ export function AdminSidebar() {
           <Flower2 className="h-5 w-5" />
         </span>
         <div>
-          <p className="font-display text-lg leading-tight">Arkaira</p>
+          <p className="font-display text-lg leading-tight">Arkiara</p>
           <p className="text-[11px] tracking-widest text-white/50 uppercase">
             Admin Panel
           </p>
