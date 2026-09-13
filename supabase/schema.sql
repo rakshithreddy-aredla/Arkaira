@@ -93,13 +93,33 @@ create policy "Public insert orders" on public.orders for insert with check (tru
 -- Anyone can submit a decoration query
 create policy "Public insert queries" on public.decoration_queries for insert with check (true);
 
--- Authenticated admins (added as users in Supabase → Authentication) get full access
-create policy "Admin write categories" on public.categories for all to authenticated using (true) with check (true);
-create policy "Admin write products"   on public.products   for all to authenticated using (true) with check (true);
-create policy "Admin read orders"      on public.orders     for select to authenticated using (true);
-create policy "Admin update orders"    on public.orders     for update to authenticated using (true) with check (true);
-create policy "Admin read queries"     on public.decoration_queries for select to authenticated using (true);
-create policy "Admin update queries"   on public.decoration_queries for update to authenticated using (true) with check (true);
+-- ---------- ADMIN helper ----------
+-- Admins are identified by email allow-list (env ADMIN_EMAILS on the server).
+-- Phone-only customer accounts (created via the /login portal) have an
+-- @phone.arkaira.in synthetic email and never match the allow-list, so they
+-- are rejected here even though Supabase treats them as "authenticated".
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+as $$
+  select exists (
+    select 1 from auth.users u
+     where u.id = auth.uid()
+       and u.email like '%@arkaira.in'
+       and u.email not like '%@phone.arkaira.in'
+       and u.phone is null
+  );
+$$;
+
+-- Authenticated admins (added as users in Supabase → Authentication) get full access.
+-- is_admin() blocks customer accounts created via the phone login portal.
+create policy "Admin write categories" on public.categories for all to authenticated using (public.is_admin()) with check (public.is_admin());
+create policy "Admin write products"   on public.products   for all to authenticated using (public.is_admin()) with check (public.is_admin());
+create policy "Admin read orders"      on public.orders     for select to authenticated using (public.is_admin());
+create policy "Admin update orders"    on public.orders     for update to authenticated using (public.is_admin()) with check (public.is_admin());
+create policy "Admin read queries"     on public.decoration_queries for select to authenticated using (public.is_admin());
+create policy "Admin update queries"   on public.decoration_queries for update to authenticated using (public.is_admin()) with check (public.is_admin());
 
 -- ---------- HELPER: atomic order + stock deduction ----------
 -- Called with the SUPABASE SERVICE ROLE key from the Next.js server.

@@ -28,19 +28,21 @@ export function AddToCartBox({ product }: { product: Product }) {
   return (
     <div>
       <div className="flex items-center gap-3">
-        <div className="flex items-center rounded-full border border-rose-200 bg-white">
+        <div className="flex items-center rounded-full border border-rose-200 bg-white p-1 shadow-sm">
           <button
             onClick={() => setQty(Math.max(1, qty - 1))}
-            className="flex h-11 w-11 items-center justify-center rounded-full text-plum transition hover:bg-rose-50 disabled:opacity-40"
+            className="flex h-10 w-10 items-center justify-center rounded-full text-plum transition hover:bg-rose-50 hover:text-rose-600 disabled:opacity-40"
             disabled={qty <= 1}
             aria-label="Decrease quantity"
           >
             <Minus className="h-4 w-4" />
           </button>
-          <span className="w-10 text-center font-semibold text-ink">{qty}</span>
+          <span className="w-10 text-center font-semibold text-ink">
+            {qty}
+          </span>
           <button
             onClick={() => setQty(Math.min(live.stock, qty + 1))}
-            className="flex h-11 w-11 items-center justify-center rounded-full text-plum transition hover:bg-rose-50 disabled:opacity-40"
+            className="flex h-10 w-10 items-center justify-center rounded-full text-plum transition hover:bg-rose-50 hover:text-rose-600 disabled:opacity-40"
             disabled={qty >= live.stock}
             aria-label="Increase quantity"
           >
@@ -50,17 +52,17 @@ export function AddToCartBox({ product }: { product: Product }) {
         <button
           onClick={handleAdd}
           disabled={out}
-          className={`flex flex-1 items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold tracking-wide text-white transition ${
+          className={`btn-sheen flex flex-1 items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold tracking-wide text-white transition-all duration-300 ${
             out
               ? "cursor-not-allowed bg-plum/30"
-              : "bg-rose-600 hover:bg-rose-700"
+              : "bg-rose-600 shadow-lg shadow-rose-600/30 hover:bg-rose-700 hover:shadow-rose-700/40 active:scale-[0.98]"
           }`}
         >
           <ShoppingBag className="h-4.5 w-4.5" />
           {out ? "Out of Stock" : "Add to Cart"}
         </button>
       </div>
-      <p className="mt-3 text-sm text-plum">
+      <p className="mt-3.5 text-sm text-plum">
         {out ? (
           <span className="font-semibold text-rose-700">
             Currently out of stock — check back soon.

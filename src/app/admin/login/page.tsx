@@ -15,16 +15,19 @@ export default async function AdminLoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 py-16">
-      <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-rose-600 text-white">
-            <Flower2 className="h-7 w-7" />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-16">
+      <div className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 animate-drift rounded-full bg-rose-100/70 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 animate-drift-slow rounded-full bg-gold-100/80 blur-3xl" />
+
+      <div className="relative w-full max-w-md">
+        <div className="mb-9 text-center">
+          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-rose-700 text-white shadow-xl shadow-rose-600/30">
+            <Flower2 className="h-8 w-8" />
           </span>
-          <h1 className="mt-5 font-display text-3xl text-ink">
+          <h1 className="mt-6 font-display text-3xl text-ink">
             Arkaira Admin
           </h1>
-          <p className="mt-2 text-[15px] text-plum">
+          <p className="mt-2 text-[14px] leading-relaxed text-plum">
             Sign in with your admin account to manage the store
           </p>
         </div>

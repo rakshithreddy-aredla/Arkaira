@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Lock } from "lucide-react";
+import { Loader2, Lock, ShieldCheck, Truck } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
 import { useToast } from "@/components/toast-provider";
+import { useSession } from "@/hooks/use-session";
 import { placeOrder } from "@/lib/orders-client";
 import { formatINR, DELIVERY_FEE, FREE_DELIVERY_ABOVE } from "@/lib/format";
 
@@ -20,6 +21,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { lines, subtotal, clear } = useCart();
   const { toast } = useToast();
+  const { user } = useSession();
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     name: "",
@@ -31,6 +33,24 @@ export default function CheckoutPage() {
     notes: "",
   });
   const scriptLoaded = useRef(false);
+  const prefilled = useRef(false);
+
+  // prefill from logged-in customer (phone account) — via event callback,
+  // not a synchronous setState in the effect body
+  useEffect(() => {
+    if (!user || prefilled.current) return;
+    prefilled.current = true;
+    const t = window.setTimeout(() => {
+      setForm((f) => ({
+        ...f,
+        name: f.name || (user.user_metadata?.full_name as string) || "",
+        phone:
+          f.phone || (user.phone ?? "").replace(/\D/g, "").slice(-10),
+        email: f.email || user.email || "",
+      }));
+    }, 0);
+    return () => window.clearTimeout(t);
+  }, [user]);
 
   const deliveryFee =
     lines.length === 0 || subtotal >= FREE_DELIVERY_ABOVE ? 0 : DELIVERY_FEE;
@@ -164,97 +184,179 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 md:py-16">
-      <h1 className="font-display text-3xl text-ink sm:text-4xl">Checkout</h1>
-      <div className="petal-divider my-6 max-w-24" />
+    <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 md:py-18">
+      <h1 className="font-display text-4xl text-ink sm:text-5xl">
+        Secure <span className="italic text-gradient">Checkout</span>
+      </h1>
+      <div className="petal-divider my-7 max-w-28" />
 
-      <form onSubmit={startPayment} className="grid gap-10 lg:grid-cols-[1fr_380px]">
-        <div className="rounded-2xl border border-rose-100 bg-white p-6 sm:p-8">
-          <h2 className="font-display text-xl text-ink">Delivery Details</h2>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+      <form
+        onSubmit={startPayment}
+        className="grid gap-10 lg:grid-cols-[1fr_390px]"
+      >
+        <div className="rounded-3xl border border-rose-100 bg-white p-7 shadow-sm sm:p-9">
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-rose-600 text-white">
+              <Truck className="h-4.5 w-4.5" />
+            </span>
+            <h2 className="font-display text-xl text-ink">
+              Delivery Details
+            </h2>
+          </div>
+          <div className="mt-7 grid gap-5 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <label className="label" htmlFor="name">Full Name</label>
-              <input id="name" className="field" value={form.name} onChange={set("name")} required />
+              <label className="label" htmlFor="name">
+                Full Name
+              </label>
+              <input
+                id="name"
+                className="field"
+                value={form.name}
+                onChange={set("name")}
+                required
+              />
             </div>
             <div>
-              <label className="label" htmlFor="phone">Phone (10 digits)</label>
-              <input id="phone" className="field" type="tel" inputMode="numeric" value={form.phone} onChange={set("phone")} required />
+              <label className="label" htmlFor="phone">
+                Phone (10 digits)
+              </label>
+              <input
+                id="phone"
+                className="field"
+                type="tel"
+                inputMode="numeric"
+                value={form.phone}
+                onChange={set("phone")}
+                required
+              />
             </div>
             <div>
-              <label className="label" htmlFor="email">Email (optional)</label>
-              <input id="email" className="field" type="email" value={form.email} onChange={set("email")} />
+              <label className="label" htmlFor="email">
+                Email (optional)
+              </label>
+              <input
+                id="email"
+                className="field"
+                type="email"
+                value={form.email}
+                onChange={set("email")}
+              />
             </div>
             <div className="sm:col-span-2">
-              <label className="label" htmlFor="address">Delivery Address</label>
-              <textarea id="address" className="field" rows={3} value={form.address} onChange={set("address")} required />
+              <label className="label" htmlFor="address">
+                Delivery Address
+              </label>
+              <textarea
+                id="address"
+                className="field"
+                rows={3}
+                value={form.address}
+                onChange={set("address")}
+                required
+              />
             </div>
             <div>
-              <label className="label" htmlFor="city">City</label>
-              <input id="city" className="field" value={form.city} onChange={set("city")} required />
+              <label className="label" htmlFor="city">
+                City
+              </label>
+              <input
+                id="city"
+                className="field"
+                value={form.city}
+                onChange={set("city")}
+                required
+              />
             </div>
             <div>
-              <label className="label" htmlFor="pincode">Pincode</label>
-              <input id="pincode" className="field" inputMode="numeric" maxLength={6} value={form.pincode} onChange={set("pincode")} required />
+              <label className="label" htmlFor="pincode">
+                Pincode
+              </label>
+              <input
+                id="pincode"
+                className="field"
+                inputMode="numeric"
+                maxLength={6}
+                value={form.pincode}
+                onChange={set("pincode")}
+                required
+              />
             </div>
             <div className="sm:col-span-2">
-              <label className="label" htmlFor="notes">Message on card / delivery notes (optional)</label>
-              <textarea id="notes" className="field" rows={2} value={form.notes} onChange={set("notes")} />
+              <label className="label" htmlFor="notes">
+                Message on card / delivery notes (optional)
+              </label>
+              <textarea
+                id="notes"
+                className="field"
+                rows={2}
+                value={form.notes}
+                onChange={set("notes")}
+              />
             </div>
           </div>
         </div>
 
-        <aside className="h-fit rounded-2xl border border-rose-100 bg-white p-6 lg:sticky lg:top-24">
-          <h2 className="font-display text-xl text-ink">Your Order</h2>
-          <ul className="mt-4 space-y-2.5 text-sm text-plum">
-            {lines.map((l) => (
-              <li key={l.product_id} className="flex justify-between gap-3">
-                <span className="truncate">
-                  {l.qty} × {l.name}
-                </span>
-                <span className="shrink-0">{formatINR(l.price * l.qty)}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="petal-divider my-4" />
-          <div className="space-y-2.5 text-[15px]">
-            <div className="flex justify-between text-plum">
-              <span>Subtotal</span>
-              <span>{formatINR(subtotal)}</span>
-            </div>
-            <div className="flex justify-between text-plum">
-              <span>Delivery</span>
-              <span>
-                {deliveryFee === 0 ? (
-                  <span className="font-semibold text-sage-600">FREE</span>
-                ) : (
-                  formatINR(deliveryFee)
-                )}
-              </span>
-            </div>
-            <div className="flex justify-between text-lg font-semibold text-ink">
-              <span>Total</span>
-              <span>{formatINR(total)}</span>
-            </div>
+        <aside className="h-fit overflow-hidden rounded-3xl border border-rose-100 bg-white shadow-lg shadow-rose-900/5 lg:sticky lg:top-28">
+          <div className="bg-gradient-to-r from-blush to-white px-7 py-5">
+            <h2 className="font-display text-xl text-ink">Your Order</h2>
           </div>
-          <button
-            type="submit"
-            disabled={submitting || lines.length === 0}
-            className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-rose-600 py-3.5 text-sm font-semibold tracking-wide text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-plum/30"
-          >
-            {submitting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" /> Setting up…
-              </>
-            ) : (
-              <>
-                <Lock className="h-4 w-4" /> Pay {formatINR(total)}
-              </>
-            )}
-          </button>
-          <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-plum/70">
-            <Lock className="h-3 w-3" /> Secure payment via Razorpay — UPI,
-            Cards, Netbanking
-          </p>
+          <div className="px-7 pb-7 pt-5">
+            <ul className="space-y-3 text-sm text-plum">
+              {lines.map((l) => (
+                <li
+                  key={l.product_id}
+                  className="flex justify-between gap-3"
+                >
+                  <span className="truncate">
+                    {l.qty} × {l.name}
+                  </span>
+                  <span className="shrink-0 font-medium text-ink">
+                    {formatINR(l.price * l.qty)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <div className="petal-divider my-5" />
+            <div className="space-y-3 text-[15px]">
+              <div className="flex justify-between text-plum">
+                <span>Subtotal</span>
+                <span>{formatINR(subtotal)}</span>
+              </div>
+              <div className="flex justify-between text-plum">
+                <span>Delivery</span>
+                <span>
+                  {deliveryFee === 0 ? (
+                    <span className="font-semibold text-sage-600">FREE</span>
+                  ) : (
+                    formatINR(deliveryFee)
+                  )}
+                </span>
+              </div>
+              <div className="flex justify-between font-display text-xl font-semibold text-ink">
+                <span>Total</span>
+                <span>{formatINR(total)}</span>
+              </div>
+            </div>
+            <button
+              type="submit"
+              disabled={submitting || lines.length === 0}
+              className="btn-sheen mt-7 flex w-full items-center justify-center gap-2 rounded-full bg-rose-600 py-4 text-sm font-semibold tracking-wide text-white shadow-xl shadow-rose-600/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-rose-700 disabled:cursor-not-allowed disabled:from-plum/30 disabled:to-plum/30 disabled:shadow-none"
+            >
+              {submitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> Setting up…
+                </>
+              ) : (
+                <>
+                  <Lock className="h-4 w-4" /> Pay {formatINR(total)}
+                </>
+              )}
+            </button>
+            <p className="mt-4 flex items-center justify-center gap-1.5 text-[11px] text-plum/70">
+              <ShieldCheck className="h-3.5 w-3.5 text-sage-600" /> Secure
+              payment via Razorpay — UPI, Cards, Netbanking
+            </p>
+          </div>
         </aside>
       </form>
     </div>
