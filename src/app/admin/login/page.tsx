@@ -15,20 +15,27 @@ export default async function AdminLoginPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-16">
-      <div className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 animate-drift rounded-full bg-rose-100/70 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 animate-drift-slow rounded-full bg-gold-100/80 blur-3xl" />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-carbon px-4 py-16">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.1]"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,0.16) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.16) 1px, transparent 1px)",
+          backgroundSize: "56px 56px",
+        }}
+      />
+      <div className="pointer-events-none absolute -left-32 top-0 h-96 w-96 rounded-full bg-accent/20 blur-3xl" />
 
-      <div className="relative w-full max-w-md">
-        <div className="mb-9 text-center">
-          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-rose-700 text-white shadow-xl shadow-rose-600/30">
-            <Flower2 className="h-8 w-8" />
+      <div className="relative w-full max-w-sm">
+        <div className="mb-8 text-center">
+          <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-white text-carbon">
+            <Flower2 className="h-6 w-6" />
           </span>
-          <h1 className="mt-6 font-display text-3xl text-ink">
+          <h1 className="mt-5 font-display text-2xl font-bold tracking-tight text-white">
             Arkaira Admin
           </h1>
-          <p className="mt-2 text-[14px] leading-relaxed text-plum">
-            Sign in with your admin account to manage the store
+          <p className="mt-2 text-[13px] text-white/50">
+            Sign in to manage the store
           </p>
         </div>
         <LoginForm />

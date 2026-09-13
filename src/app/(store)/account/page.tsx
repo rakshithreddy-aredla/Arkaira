@@ -18,7 +18,7 @@ import {
 import { createServerSupabase } from "@/lib/admin-auth";
 import { getOrdersByPhone } from "@/lib/orders-server";
 import { formatINR } from "@/lib/format";
-import { formatPhone } from "@/hooks/use-session";
+import { formatPhone, getAccountPhone } from "@/lib/phone";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -40,12 +40,12 @@ const statusConfig: Record<
   paid: {
     label: "Paid",
     icon: CircleDollarSign,
-    classes: "bg-rose-50 text-rose-700 border-rose-200",
+    classes: "bg-accent-soft text-accent border-accent-line",
   },
   processing: {
     label: "Being arranged",
     icon: Flower2,
-    classes: "bg-rose-50 text-rose-700 border-rose-200",
+    classes: "bg-accent-soft text-accent border-accent-line",
   },
   shipped: {
     label: "Out for delivery",
@@ -55,7 +55,7 @@ const statusConfig: Record<
   delivered: {
     label: "Delivered",
     icon: PackageCheck,
-    classes: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    classes: "bg-ok-soft text-ok border-green-200",
   },
   cancelled: {
     label: "Cancelled",
@@ -74,7 +74,7 @@ export default async function AccountPage() {
     redirect("/login?next=/account");
   }
 
-  const phone = user.phone ?? "";
+  const phone = getAccountPhone(user);
   const name =
     (user.user_metadata?.full_name as string) ||
     user.email?.split("@")[0] ||
@@ -89,46 +89,53 @@ export default async function AccountPage() {
   );
 
   return (
-    <div className="relative mx-auto max-w-5xl px-4 py-14 sm:px-6 md:py-18">
-      <div className="pointer-events-none absolute -left-24 -top-16 h-72 w-72 rounded-full bg-rose-100/60 blur-3xl" />
-
+    <div className="mx-auto max-w-4xl px-4 py-14 sm:px-6">
       {/* header card */}
-      <div className="relative overflow-hidden rounded-[2rem] border border-rose-100 bg-ink p-8 shadow-2xl shadow-ink/25 sm:p-10">
-        <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 animate-drift rounded-full bg-rose-800/50 blur-3xl" />
-        <div className="pointer-events-none absolute -left-16 bottom-0 h-48 w-48 animate-drift-slow rounded-full bg-gold-600/15 blur-3xl" />
+      <div className="relative overflow-hidden rounded-2xl bg-carbon p-8 sm:p-10">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.1]"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(255,255,255,0.16) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.16) 1px, transparent 1px)",
+            backgroundSize: "56px 56px",
+          }}
+        />
+        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-accent/25 blur-3xl" />
 
         <div className="relative flex flex-wrap items-center justify-between gap-6">
           <div className="flex items-center gap-5">
-            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-rose-700 font-display text-2xl font-bold text-white shadow-xl shadow-rose-600/40">
+            <span className="flex h-14 w-14 items-center justify-center rounded-xl bg-accent font-display text-2xl font-bold text-white">
               {name.charAt(0).toUpperCase()}
             </span>
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-300">
-                My Account
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/40">
+                My account
               </p>
-              <h1 className="mt-1 font-display text-3xl text-white">
-                Hello, {name.split(" ")[0]}
+              <h1 className="mt-1 font-display text-3xl font-bold tracking-tight text-white">
+                {name.split(" ")[0]}
               </h1>
-              <p className="mt-1.5 flex items-center gap-1.5 text-[13px] text-white/60">
-                <Phone className="h-3.5 w-3.5 text-rose-300" />
-                {formatPhone(phone)}
-              </p>
+              {phone && (
+                <p className="mt-1 flex items-center gap-1.5 text-[13px] text-white/50">
+                  <Phone className="h-3.5 w-3.5 text-accent" />
+                  {formatPhone(phone)}
+                </p>
+              )}
             </div>
           </div>
           <div className="flex gap-3">
-            <div className="rounded-2xl bg-white/10 px-5 py-3.5 backdrop-blur-sm">
-              <p className="font-display text-2xl font-semibold text-white">
+            <div className="rounded-xl border border-white/10 bg-white/5 px-5 py-3.5">
+              <p className="font-display text-2xl font-bold text-white">
                 {orders.length}
               </p>
-              <p className="text-[11px] uppercase tracking-widest text-white/60">
+              <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-white/40">
                 Orders
               </p>
             </div>
-            <div className="rounded-2xl bg-white/10 px-5 py-3.5 backdrop-blur-sm">
-              <p className="font-display text-2xl font-semibold text-white">
+            <div className="rounded-xl border border-white/10 bg-white/5 px-5 py-3.5">
+              <p className="font-display text-2xl font-bold text-white">
                 {formatINR(totalSpent)}
               </p>
-              <p className="text-[11px] uppercase tracking-widest text-white/60">
+              <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-white/40">
                 Spent
               </p>
             </div>
@@ -138,8 +145,8 @@ export default async function AccountPage() {
 
       {/* active order callout */}
       {activeOrders.length > 0 && (
-        <div className="relative mt-6 flex items-center gap-4 rounded-2xl border border-indigo-200 bg-indigo-50 px-6 py-4">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-indigo-700">
+        <div className="mt-6 flex items-center gap-4 rounded-xl border border-indigo-200 bg-indigo-50 px-5 py-4">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700">
             <Truck className="h-5 w-5" />
           </span>
           <div className="flex-1">
@@ -147,7 +154,7 @@ export default async function AccountPage() {
               {activeOrders.length} order
               {activeOrders.length > 1 ? "s" : ""} on the way
             </p>
-            <p className="text-[13px] text-plum">
+            <p className="text-[13px] text-ink-2">
               Latest: {activeOrders[0].order_number} ·{" "}
               {statusConfig[activeOrders[0].status]?.label ??
                 activeOrders[0].status}
@@ -157,69 +164,64 @@ export default async function AccountPage() {
       )}
 
       {/* orders */}
-      <div className="relative mt-10">
+      <div className="mt-10">
         <div className="mb-6 flex items-end justify-between">
           <div>
-            <h2 className="font-display text-2xl text-ink">Order History</h2>
-            <div className="petal-divider mt-3 w-32" />
+            <h2 className="font-display text-2xl font-bold tracking-tight text-ink">
+              Order history
+            </h2>
+            <div className="hairline mt-3 w-32" />
           </div>
-          <Link
-            href="/shop"
-            className="btn-sheen inline-flex items-center gap-2 rounded-full bg-rose-600 px-6 py-2.5 text-[13px] font-semibold text-white shadow-lg shadow-rose-600/25 transition-all duration-300 hover:-translate-y-0.5 hover:bg-rose-700"
-          >
+          <Link href="/shop" className="btn-secondary">
             <ShoppingBag className="h-4 w-4" /> Order Flowers
           </Link>
         </div>
 
         {orders.length === 0 ? (
-          <div className="flex flex-col items-center rounded-[2rem] border border-rose-100 bg-white px-6 py-16 text-center">
-            <span className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-rose-100 to-rose-200 text-rose-400">
-              <Package className="h-9 w-9" />
+          <div className="flex flex-col items-center rounded-2xl border border-dashed border-line-strong bg-surface px-6 py-16 text-center">
+            <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-surface-2 text-ink-3">
+              <Package className="h-7 w-7" />
             </span>
-            <h3 className="mt-6 font-display text-2xl text-ink">
+            <h3 className="mt-6 font-display text-2xl font-bold text-ink">
               No orders yet
             </h3>
-            <p className="mt-2 max-w-sm text-[14px] leading-relaxed text-plum">
+            <p className="mt-2 max-w-sm text-[14px] leading-relaxed text-ink-2">
               When you order flowers with this number, they&apos;ll appear
               here with live status.
             </p>
-            <Link
-              href="/shop"
-              className="btn-sheen mt-7 inline-flex items-center gap-2 rounded-full bg-rose-600 px-7 py-3.5 text-sm font-semibold text-white shadow-xl shadow-rose-600/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-rose-700"
-            >
+            <Link href="/shop" className="btn-primary mt-7">
               Browse Flowers
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         ) : (
-          <div className="space-y-5">
+          <div className="space-y-4">
             {orders.map((order) => {
               const status =
                 statusConfig[order.status] ?? {
                   label: order.status,
                   icon: Package,
-                  classes: "bg-rose-50 text-rose-700 border-rose-200",
+                  classes: "bg-accent-soft text-accent border-accent-line",
                 };
               return (
                 <div
                   key={order.id}
-                  className="card-hover overflow-hidden rounded-3xl border border-rose-100 bg-white shadow-sm"
+                  className="card-hover overflow-hidden rounded-2xl border border-line bg-surface"
                 >
-                  {/* order header */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-rose-100 bg-gradient-to-r from-blush to-white px-6 py-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-surface-2/50 px-6 py-4">
                     <div className="flex items-center gap-3">
                       <span
-                        className={`flex h-9 w-9 items-center justify-center rounded-full border ${status.classes}`}
+                        className={`flex h-9 w-9 items-center justify-center rounded-lg border ${status.classes}`}
                       >
                         <status.icon
                           className={`h-4 w-4 ${order.status === "pending" ? "animate-spin" : ""}`}
                         />
                       </span>
                       <div>
-                        <p className="font-display text-[16px] font-semibold text-ink">
+                        <p className="font-display text-[15px] font-semibold text-ink">
                           {order.order_number}
                         </p>
-                        <p className="flex items-center gap-1.5 text-[12px] text-plum/70">
+                        <p className="flex items-center gap-1.5 text-[12px] text-ink-3">
                           <CalendarDays className="h-3 w-3" />
                           {new Date(order.created_at).toLocaleDateString(
                             "en-IN",
@@ -234,23 +236,22 @@ export default async function AccountPage() {
                     </div>
                     <div className="flex items-center gap-3">
                       <span
-                        className={`rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-wide ${status.classes}`}
+                        className={`rounded-md border px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide ${status.classes}`}
                       >
                         {status.label}
                       </span>
-                      <span className="font-display text-lg font-semibold text-ink">
+                      <span className="font-display text-lg font-bold text-ink">
                         {formatINR(order.total)}
                       </span>
                     </div>
                   </div>
 
-                  {/* items */}
                   <div className="flex flex-wrap items-center gap-4 px-6 py-5">
                     <div className="flex -space-x-3">
                       {order.items.slice(0, 4).map((item, i) => (
                         <div
                           key={i}
-                          className="relative h-14 w-12 overflow-hidden rounded-xl border-2 border-white bg-rose-100 shadow-md"
+                          className="relative h-14 w-12 overflow-hidden rounded-lg border-2 border-surface bg-surface-2 shadow-sm"
                           style={{ zIndex: 4 - i }}
                         >
                           {item.image_url && (
@@ -271,15 +272,15 @@ export default async function AccountPage() {
                           .map((i) => `${i.qty} × ${i.name}`)
                           .join(", ")}
                       </p>
-                      <p className="mt-1 flex items-center gap-1.5 text-[12px] text-plum/70">
+                      <p className="mt-1 flex items-center gap-1.5 text-[12px] text-ink-3">
                         <MapPin className="h-3 w-3" />
                         {order.city} · {order.pincode}
                       </p>
                     </div>
                     <span
-                      className={`rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wide ${
+                      className={`rounded-md px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide ${
                         order.payment_status === "paid"
-                          ? "bg-sage-100 text-sage-600"
+                          ? "bg-ok-soft text-ok"
                           : "bg-amber-50 text-amber-700"
                       }`}
                     >

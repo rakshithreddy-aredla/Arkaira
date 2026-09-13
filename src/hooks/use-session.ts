@@ -40,9 +40,3 @@ export function useSession() {
 
   return { user, loading };
 }
-
-export function formatPhone(phone: string | null | undefined): string {
-  const digits = (phone ?? "").replace(/\D/g, "").slice(-10);
-  if (digits.length !== 10) return phone ?? "";
-  return `+91 ${digits.slice(0, 5)} ${digits.slice(5)}`;
-}

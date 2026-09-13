@@ -13,10 +13,10 @@ import {
   LogOut,
   LayoutDashboard,
   ChevronDown,
-  Sparkles,
+  Zap,
 } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
-import { useSession, formatPhone } from "@/hooks/use-session";
+import { useSession } from "@/hooks/use-session";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 const links = [
@@ -42,7 +42,7 @@ export function Header() {
   };
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
+    const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -69,24 +69,26 @@ export function Header() {
     router.refresh();
   };
 
-  // Admins sign in with email; customer accounts are phone-only
-  // (synthetic @phone.arkaira.in emails) and must not see admin links.
   const isAdmin = !!user?.email && !user.email.endsWith("@phone.arkaira.in");
 
   return (
     <header className="sticky top-0 z-50">
-      {/* announcement bar */}
-      <div className="bg-ink text-white">
-        <div className="marquee-hover-pause overflow-hidden py-1.5 text-[11px] font-medium tracking-[0.14em] uppercase">
-          <div className="marquee gap-10 text-white/80">
+      {/* status strip */}
+      <div className="bg-carbon text-white/70">
+        <div className="marquee-hover-pause overflow-hidden py-1.5">
+          <div className="marquee items-center gap-8 pr-8 text-[11px] font-medium tracking-[0.08em] uppercase">
             {[0, 1].map((copy) => (
-              <div key={copy} className="flex shrink-0 items-center gap-10 pr-10">
+              <div
+                key={copy}
+                className="flex shrink-0 items-center gap-8 pr-8"
+              >
                 <span className="flex items-center gap-1.5">
-                  <Sparkles className="h-3 w-3 text-gold-300" /> Freshly cut, hand-tied daily
+                  <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-ok" />
+                  Live inventory synced
                 </span>
                 <span>Same-day delivery on orders before 2 PM</span>
-                <span className="text-gold-300">Free delivery above ₹999</span>
-                <span>Weddings &amp; event decoration — enquire today</span>
+                <span className="text-white">Free delivery above ₹999</span>
+                <span>Event decoration — get a quote today</span>
               </div>
             ))}
           </div>
@@ -95,20 +97,23 @@ export function Header() {
 
       {/* main bar */}
       <div
-        className={`border-b transition-all duration-300 ${
+        className={`border-b transition-colors duration-200 ${
           scrolled
-            ? "border-rose-100 bg-cream/85 shadow-[0_8px_30px_-18px_rgba(137,47,74,0.25)] backdrop-blur-xl"
-            : "border-transparent bg-cream/70 backdrop-blur-md"
+            ? "border-line bg-paper/90 shadow-[0_1px_12px_-6px_rgba(19,19,19,0.15)] backdrop-blur-xl"
+            : "border-line bg-paper/80 backdrop-blur-md"
         }`}
       >
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3.5 sm:px-6">
-          <Link href="/" onClick={closeMenus} className="group flex items-center gap-2.5">
-            <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-rose-700 text-white shadow-lg shadow-rose-600/25 transition-transform duration-300 group-hover:rotate-[25deg]">
-              <Flower2 className="h-5 w-5" />
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+          <Link
+            href="/"
+            onClick={closeMenus}
+            className="flex items-center gap-2"
+          >
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-carbon text-white">
+              <Flower2 className="h-4.5 w-4.5" />
             </span>
-            <span className="font-display text-[22px] font-semibold tracking-wide text-ink">
+            <span className="font-display text-lg font-bold tracking-tight text-ink">
               Arkaira
-              <span className="text-rose-500">.</span>
             </span>
           </Link>
 
@@ -116,95 +121,92 @@ export function Header() {
             {links.map((l) => {
               const active = pathname === l.href;
               return (
-                  <Link
+                <Link
                   key={l.href}
                   href={l.href}
                   onClick={closeMenus}
-                  className={`relative rounded-full px-4 py-2 text-[14px] font-medium tracking-wide transition-colors ${
+                  className={`rounded-lg px-3.5 py-2 text-[14px] font-medium transition-colors ${
                     active
-                      ? "text-rose-700"
-                      : "text-plum hover:text-rose-600"
+                      ? "bg-surface-2 text-ink"
+                      : "text-ink-2 hover:bg-surface-2 hover:text-ink"
                   }`}
                 >
                   {l.label}
-                  <span
-                    className={`absolute inset-x-4 -bottom-0.5 h-px bg-rose-500 transition-transform duration-300 ${
-                      active ? "scale-x-100" : "scale-x-0"
-                    }`}
-                  />
                 </Link>
               );
             })}
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {/* account */}
             <div className="relative" ref={accountRef}>
               <button
                 onClick={() => setAccountOpen((v) => !v)}
-                className="flex h-10 items-center gap-1.5 rounded-full border border-rose-200 bg-white pr-2.5 pl-2.5 text-plum transition hover:border-rose-400 hover:text-rose-600"
+                className="flex h-9 items-center gap-1.5 rounded-lg border border-line-strong bg-surface px-2.5 text-ink-2 transition-colors hover:border-ink hover:text-ink"
                 aria-label="Account"
               >
                 {user ? (
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-rose-700 text-[11px] font-bold text-white">
-                    {(user.phone ?? user.email ?? "A").slice(-2, -1) || "A"}
+                  <span className="flex h-6 w-6 items-center justify-center rounded-md bg-accent text-[11px] font-bold text-white">
+                    {(user.email ?? user.phone ?? "A").charAt(0).toUpperCase()}
                   </span>
                 ) : (
-                  <UserCircle2 className="h-5 w-5" />
+                  <UserCircle2 className="h-4.5 w-4.5" />
                 )}
                 <ChevronDown
-                  className={`h-3.5 w-3.5 text-plum/60 transition-transform duration-300 ${accountOpen ? "rotate-180" : ""}`}
+                  className={`h-3.5 w-3.5 transition-transform duration-200 ${accountOpen ? "rotate-180" : ""}`}
                 />
               </button>
 
               {accountOpen && (
-                <div className="animate-pop-in absolute right-0 top-12 w-64 overflow-hidden rounded-2xl border border-rose-100 bg-white shadow-xl shadow-rose-900/10">
+                <div className="animate-pop-in absolute right-0 top-11 w-60 rounded-xl border border-line bg-surface shadow-xl shadow-ink/10">
                   {user ? (
                     <>
-                      <div className="border-b border-rose-100 bg-rose-50/60 px-4 py-3.5">
-                        <p className="text-[11px] font-semibold uppercase tracking-widest text-plum/60">
-                          Signed in as
+                      <div className="border-b border-line px-4 py-3">
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-3">
+                          Signed in
                         </p>
-                        <p className="mt-1 truncate text-[15px] font-semibold text-ink">
-                          {user.phone ? formatPhone(user.phone) : user.email}
+                        <p className="mt-0.5 truncate text-[14px] font-semibold text-ink">
+                          {user.email?.replace("@phone.arkaira.in", "") ??
+                            user.phone ??
+                            "Customer"}
                         </p>
                       </div>
                       <div className="p-1.5">
                         <Link
                           href="/account"
                           onClick={() => setAccountOpen(false)}
-                          className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-[14px] font-medium text-plum transition hover:bg-rose-50 hover:text-rose-700"
+                          className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[14px] font-medium text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink"
                         >
-                          <Package className="h-4 w-4 text-rose-500" /> My Orders
+                          <Package className="h-4 w-4" /> My Orders
                         </Link>
                         {isAdmin && (
                           <Link
                             href="/admin"
                             onClick={() => setAccountOpen(false)}
-                            className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-[14px] font-medium text-plum transition hover:bg-rose-50 hover:text-rose-700"
+                            className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[14px] font-medium text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink"
                           >
-                            <LayoutDashboard className="h-4 w-4 text-rose-500" /> Admin Dashboard
+                            <LayoutDashboard className="h-4 w-4" /> Admin
                           </Link>
                         )}
                         <button
                           onClick={signOut}
-                          className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-[14px] font-medium text-plum transition hover:bg-rose-50 hover:text-rose-700"
+                          className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[14px] font-medium text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink"
                         >
-                          <LogOut className="h-4 w-4 text-rose-500" /> Sign Out
+                          <LogOut className="h-4 w-4" /> Sign Out
                         </button>
                       </div>
                     </>
                   ) : (
-                    <div className="p-2">
-                      <p className="px-3 pt-2 pb-1 text-[13px] leading-relaxed text-plum/80">
+                    <div className="p-3">
+                      <p className="text-[13px] leading-relaxed text-ink-3">
                         Sign in to track orders and check out faster.
                       </p>
                       <Link
                         href="/login"
                         onClick={() => setAccountOpen(false)}
-                        className="btn-sheen mt-2 flex items-center justify-center gap-2 rounded-full bg-rose-600 px-5 py-2.5 text-[13px] font-semibold tracking-wide text-white transition hover:bg-rose-700"
+                        className="btn-primary mt-3 w-full"
                       >
-                        <UserCircle2 className="h-4 w-4" /> Login / Sign Up
+                        Login / Sign Up
                       </Link>
                     </div>
                   )}
@@ -216,38 +218,38 @@ export function Header() {
             <Link
               href="/cart"
               onClick={closeMenus}
-              className="relative flex h-10 w-10 items-center justify-center rounded-full border border-rose-200 bg-white text-plum transition hover:border-rose-400 hover:text-rose-600"
+              className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-line-strong bg-surface text-ink-2 transition-colors hover:border-ink hover:text-ink"
               aria-label="Cart"
             >
-              <ShoppingBag className="h-5 w-5" />
+              <ShoppingBag className="h-4.5 w-4.5" />
               {count > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 animate-pop-in items-center justify-center rounded-full bg-rose-600 px-1 text-[11px] font-bold text-white shadow-md shadow-rose-600/40">
+                <span className="animate-pop-in absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-[11px] font-bold text-white">
                   {count}
                 </span>
               )}
             </Link>
 
             <button
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-rose-200 bg-white text-plum md:hidden"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-line-strong bg-surface text-ink-2 md:hidden"
               onClick={() => setOpen(!open)}
               aria-label="Menu"
             >
-              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {open ? <X className="h-4.5 w-4.5" /> : <Menu className="h-4.5 w-4.5" />}
             </button>
           </div>
         </div>
 
         {open && (
-          <nav className="animate-fade-in flex flex-col gap-1 border-t border-rose-100 bg-cream px-4 py-3 md:hidden">
+          <nav className="animate-fade-in flex flex-col gap-1 border-t border-line bg-paper px-4 py-3 md:hidden">
             {links.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
                 onClick={() => setOpen(false)}
-                className={`rounded-xl px-3.5 py-2.5 text-[15px] font-medium ${
+                className={`rounded-lg px-3 py-2.5 text-[15px] font-medium ${
                   pathname === l.href
-                    ? "bg-rose-100 text-rose-700"
-                    : "text-plum hover:bg-rose-50"
+                    ? "bg-surface-2 text-ink"
+                    : "text-ink-2 hover:bg-surface-2"
                 }`}
               >
                 {l.label}
@@ -257,9 +259,9 @@ export function Header() {
               <Link
                 href="/login"
                 onClick={() => setOpen(false)}
-                className="mt-1 flex items-center justify-center gap-2 rounded-full bg-rose-600 px-5 py-2.5 text-[14px] font-semibold text-white"
+                className="btn-primary mt-2"
               >
-                <UserCircle2 className="h-4 w-4" /> Login / Sign Up
+                <Zap className="h-4 w-4" /> Login / Sign Up
               </Link>
             )}
           </nav>

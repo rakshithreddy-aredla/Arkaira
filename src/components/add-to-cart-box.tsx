@@ -28,10 +28,10 @@ export function AddToCartBox({ product }: { product: Product }) {
   return (
     <div>
       <div className="flex items-center gap-3">
-        <div className="flex items-center rounded-full border border-rose-200 bg-white p-1 shadow-sm">
+        <div className="flex items-center rounded-lg border border-line-strong bg-surface">
           <button
             onClick={() => setQty(Math.max(1, qty - 1))}
-            className="flex h-10 w-10 items-center justify-center rounded-full text-plum transition hover:bg-rose-50 hover:text-rose-600 disabled:opacity-40"
+            className="flex h-10 w-10 items-center justify-center text-ink-2 transition-colors hover:text-ink disabled:opacity-40"
             disabled={qty <= 1}
             aria-label="Decrease quantity"
           >
@@ -42,7 +42,7 @@ export function AddToCartBox({ product }: { product: Product }) {
           </span>
           <button
             onClick={() => setQty(Math.min(live.stock, qty + 1))}
-            className="flex h-10 w-10 items-center justify-center rounded-full text-plum transition hover:bg-rose-50 hover:text-rose-600 disabled:opacity-40"
+            className="flex h-10 w-10 items-center justify-center text-ink-2 transition-colors hover:text-ink disabled:opacity-40"
             disabled={qty >= live.stock}
             aria-label="Increase quantity"
           >
@@ -52,27 +52,28 @@ export function AddToCartBox({ product }: { product: Product }) {
         <button
           onClick={handleAdd}
           disabled={out}
-          className={`btn-sheen flex flex-1 items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold tracking-wide text-white transition-all duration-300 ${
-            out
-              ? "cursor-not-allowed bg-plum/30"
-              : "bg-rose-600 shadow-lg shadow-rose-600/30 hover:bg-rose-700 hover:shadow-rose-700/40 active:scale-[0.98]"
+          className={`btn-primary flex-1 ${
+            out ? "cursor-not-allowed bg-line-strong text-ink-3" : ""
           }`}
         >
-          <ShoppingBag className="h-4.5 w-4.5" />
+          <ShoppingBag className="h-4 w-4" />
           {out ? "Out of Stock" : "Add to Cart"}
         </button>
       </div>
-      <p className="mt-3.5 text-sm text-plum">
+      <p className="mt-3.5 flex items-center gap-2 text-[13px] text-ink-2">
+        <span
+          className={`h-1.5 w-1.5 rounded-full ${out ? "bg-rose-500" : live.stock <= 5 ? "bg-accent pulse-dot" : "bg-ok"}`}
+        />
         {out ? (
-          <span className="font-semibold text-rose-700">
+          <span className="font-semibold text-rose-600">
             Currently out of stock — check back soon.
           </span>
         ) : live.stock <= 5 ? (
-          <span className="font-semibold text-rose-700">
-            Hurry, only {live.stock} left in stock!
+          <span className="font-semibold text-accent">
+            Only {live.stock} left in stock
           </span>
         ) : (
-          <>In stock: {live.stock} available</>
+          <>In stock · {live.stock} available live</>
         )}
       </p>
     </div>

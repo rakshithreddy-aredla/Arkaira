@@ -35,8 +35,8 @@ export default function CheckoutPage() {
   const scriptLoaded = useRef(false);
   const prefilled = useRef(false);
 
-  // prefill from logged-in customer (phone account) — via event callback,
-  // not a synchronous setState in the effect body
+  // prefill from logged-in customer — deferred to a timer so the state
+  // update happens in response to an external event, not synchronously
   useEffect(() => {
     if (!user || prefilled.current) return;
     prefilled.current = true;
@@ -45,8 +45,10 @@ export default function CheckoutPage() {
         ...f,
         name: f.name || (user.user_metadata?.full_name as string) || "",
         phone:
-          f.phone || (user.phone ?? "").replace(/\D/g, "").slice(-10),
-        email: f.email || user.email || "",
+          f.phone ||
+          (user.user_metadata?.phone as string) ||
+          (user.email ?? "").replace("@phone.arkaira.in", ""),
+        email: f.email || (user.email?.includes("@phone.") ? "" : user.email) || "",
       }));
     }, 0);
     return () => window.clearTimeout(t);
@@ -184,23 +186,19 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 md:py-18">
-      <h1 className="font-display text-4xl text-ink sm:text-5xl">
-        Secure <span className="italic text-gradient">Checkout</span>
+    <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+      <h1 className="font-display text-4xl font-bold tracking-tight text-ink">
+        Checkout
       </h1>
-      <div className="petal-divider my-7 max-w-28" />
 
-      <form
-        onSubmit={startPayment}
-        className="grid gap-10 lg:grid-cols-[1fr_390px]"
-      >
-        <div className="rounded-3xl border border-rose-100 bg-white p-7 shadow-sm sm:p-9">
+      <form onSubmit={startPayment} className="mt-8 grid gap-8 lg:grid-cols-[1fr_380px]">
+        <div className="rounded-2xl border border-line bg-surface p-7">
           <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-rose-600 text-white">
-              <Truck className="h-4.5 w-4.5" />
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-carbon text-white">
+              <Truck className="h-4 w-4" />
             </span>
-            <h2 className="font-display text-xl text-ink">
-              Delivery Details
+            <h2 className="font-display text-lg font-semibold text-ink">
+              Delivery details
             </h2>
           </div>
           <div className="mt-7 grid gap-5 sm:grid-cols-2">
@@ -296,12 +294,14 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        <aside className="h-fit overflow-hidden rounded-3xl border border-rose-100 bg-white shadow-lg shadow-rose-900/5 lg:sticky lg:top-28">
-          <div className="bg-gradient-to-r from-blush to-white px-7 py-5">
-            <h2 className="font-display text-xl text-ink">Your Order</h2>
+        <aside className="h-fit overflow-hidden rounded-2xl border border-line bg-surface lg:sticky lg:top-28">
+          <div className="border-b border-line px-6 py-4">
+            <h2 className="font-display text-lg font-semibold text-ink">
+              Your order
+            </h2>
           </div>
-          <div className="px-7 pb-7 pt-5">
-            <ul className="space-y-3 text-sm text-plum">
+          <div className="px-6 py-5">
+            <ul className="space-y-2.5 text-sm text-ink-2">
               {lines.map((l) => (
                 <li
                   key={l.product_id}
@@ -316,23 +316,23 @@ export default function CheckoutPage() {
                 </li>
               ))}
             </ul>
-            <div className="petal-divider my-5" />
-            <div className="space-y-3 text-[15px]">
-              <div className="flex justify-between text-plum">
+            <div className="hairline my-5" />
+            <div className="space-y-2.5 text-[14px]">
+              <div className="flex justify-between text-ink-2">
                 <span>Subtotal</span>
                 <span>{formatINR(subtotal)}</span>
               </div>
-              <div className="flex justify-between text-plum">
+              <div className="flex justify-between text-ink-2">
                 <span>Delivery</span>
                 <span>
                   {deliveryFee === 0 ? (
-                    <span className="font-semibold text-sage-600">FREE</span>
+                    <span className="font-semibold text-ok">FREE</span>
                   ) : (
                     formatINR(deliveryFee)
                   )}
                 </span>
               </div>
-              <div className="flex justify-between font-display text-xl font-semibold text-ink">
+              <div className="flex justify-between font-display text-xl font-bold text-ink">
                 <span>Total</span>
                 <span>{formatINR(total)}</span>
               </div>
@@ -340,7 +340,7 @@ export default function CheckoutPage() {
             <button
               type="submit"
               disabled={submitting || lines.length === 0}
-              className="btn-sheen mt-7 flex w-full items-center justify-center gap-2 rounded-full bg-rose-600 py-4 text-sm font-semibold tracking-wide text-white shadow-xl shadow-rose-600/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-rose-700 disabled:cursor-not-allowed disabled:from-plum/30 disabled:to-plum/30 disabled:shadow-none"
+              className="btn-primary mt-6 w-full"
             >
               {submitting ? (
                 <>
@@ -352,9 +352,9 @@ export default function CheckoutPage() {
                 </>
               )}
             </button>
-            <p className="mt-4 flex items-center justify-center gap-1.5 text-[11px] text-plum/70">
-              <ShieldCheck className="h-3.5 w-3.5 text-sage-600" /> Secure
-              payment via Razorpay — UPI, Cards, Netbanking
+            <p className="mt-3.5 flex items-center justify-center gap-1.5 text-[11px] text-ink-3">
+              <ShieldCheck className="h-3.5 w-3.5 text-ok" /> Secure payment
+              via Razorpay — UPI, cards, netbanking
             </p>
           </div>
         </aside>

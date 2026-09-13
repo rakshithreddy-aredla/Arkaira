@@ -1,12 +1,4 @@
-import {
-  Phone,
-  Mail,
-  Clock,
-  MapPin,
-  MessageCircle,
-  ArrowRight,
-  Flower2,
-} from "lucide-react";
+import { Phone, Mail, Clock, MapPin, MessageCircle, ArrowRight, Truck } from "lucide-react";
 import { Reveal } from "@/components/reveal";
 import type { Metadata } from "next";
 
@@ -19,7 +11,7 @@ const cards = [
     icon: Phone,
     title: "Call / WhatsApp",
     main: "+91 98765 43210",
-    sub: "For orders, delivery updates and decoration queries",
+    sub: "Orders, delivery updates, decoration queries",
     href: "tel:+919876543210",
   },
   {
@@ -46,7 +38,7 @@ const cards = [
 const faqs = [
   {
     q: "How do I track my order?",
-    a: "Sign in with your phone number and open My Orders for live status, or WhatsApp us with your order number.",
+    a: "Sign in with your phone number and open My Orders for live status — from being arranged to out for delivery.",
   },
   {
     q: "Can I get same-day delivery?",
@@ -60,95 +52,84 @@ const faqs = [
 
 export default function ContactPage() {
   return (
-    <div className="relative overflow-hidden">
-      <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-rose-100/60 blur-3xl" />
-      <div className="relative mx-auto max-w-5xl px-4 py-16 sm:px-6 md:py-20">
-        <Reveal className="mb-14 text-center">
-          <span className="text-[11px] font-semibold tracking-[0.28em] text-rose-600 uppercase">
-            We&apos;d love to hear from you
-          </span>
-          <h1 className="mt-3 font-display text-5xl text-ink sm:text-6xl">
-            Contact <span className="italic text-gradient">Us</span>
-          </h1>
-          <div className="petal-divider mx-auto mt-5 w-44" />
-        </Reveal>
+    <div className="mx-auto max-w-4xl px-4 py-14 sm:px-6 md:py-18">
+      <Reveal className="mb-12">
+        <span className="eyebrow">We&apos;d love to hear from you</span>
+        <h1 className="mt-4 font-display text-5xl font-bold tracking-tight text-ink">
+          Contact us
+        </h1>
+      </Reveal>
 
-        <div className="grid gap-6 sm:grid-cols-2">
-          {cards.map((c, i) => (
-            <Reveal key={c.title} delay={i * 100}>
-              <div
-                className={`card-hover h-full rounded-3xl border border-rose-100 bg-white p-8 ${
-                  c.href ? "group cursor-pointer" : ""
-                }`}
-                {...(c.href ? { onClick: undefined } : {})}
-              >
-                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-rose-100 to-rose-200 text-rose-600 shadow-inner">
-                  <c.icon className="h-5 w-5" />
-                </span>
-                <h2 className="mt-5 font-display text-xl text-ink">
-                  {c.title}
-                </h2>
-                {c.href ? (
-                  <a
-                    href={c.href}
-                    className="mt-1.5 block font-display text-[17px] font-semibold text-rose-700 transition-colors group-hover:text-rose-600"
-                  >
-                    {c.main}
-                  </a>
-                ) : (
-                  <p className="mt-1.5 font-display text-[17px] font-semibold text-ink">
-                    {c.main}
-                  </p>
-                )}
-                <p className="mt-2 text-[13px] leading-relaxed text-plum/80">
-                  {c.sub}
+      <div className="grid gap-4 sm:grid-cols-2">
+        {cards.map((c, i) => (
+          <Reveal key={c.title} delay={i * 70}>
+            <div className="card-hover h-full rounded-2xl border border-line bg-surface p-7">
+              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent-soft text-accent">
+                <c.icon className="h-5 w-5" />
+              </span>
+              <h2 className="mt-5 font-display text-lg font-semibold text-ink">
+                {c.title}
+              </h2>
+              {c.href ? (
+                <a
+                  href={c.href}
+                  className="mt-1 block font-display text-[16px] font-semibold text-accent transition-colors hover:text-accent-strong"
+                >
+                  {c.main}
+                </a>
+              ) : (
+                <p className="mt-1 font-display text-[16px] font-semibold text-ink">
+                  {c.main}
+                </p>
+              )}
+              <p className="mt-1.5 text-[13px] text-ink-3">{c.sub}</p>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+
+      <Reveal delay={120} className="mt-10">
+        <div className="rounded-2xl border border-line bg-surface p-8">
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-carbon text-white">
+              <MessageCircle className="h-4.5 w-4.5" />
+            </span>
+            <h2 className="font-display text-xl font-semibold text-ink">
+              FAQs
+            </h2>
+          </div>
+          <div className="mt-7 divide-y divide-line">
+            {faqs.map((f) => (
+              <div key={f.q} className="py-5 first:pt-0 last:pb-0">
+                <h3 className="font-semibold text-ink">{f.q}</h3>
+                <p className="mt-1.5 text-[14px] leading-relaxed text-ink-2">
+                  {f.a}
                 </p>
               </div>
-            </Reveal>
-          ))}
-        </div>
-
-        <Reveal delay={150} className="mt-10">
-          <div className="relative overflow-hidden rounded-[2rem] border border-rose-100 bg-blush p-8 sm:p-10">
-            <div className="pointer-events-none absolute -left-10 -top-10 h-32 w-32 rounded-full bg-rose-200/50 blur-2xl" />
-            <div className="relative flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-rose-600 text-white">
-                <MessageCircle className="h-5 w-5" />
-              </span>
-              <h2 className="font-display text-2xl text-ink">FAQs</h2>
-            </div>
-            <div className="relative mt-7 space-y-7">
-              {faqs.map((f) => (
-                <div
-                  key={f.q}
-                  className="rounded-2xl border border-rose-100 bg-white/80 p-5 backdrop-blur-sm"
-                >
-                  <h3 className="flex items-start gap-2 font-semibold text-ink">
-                    <Flower2 className="mt-1 h-4 w-4 shrink-0 text-rose-500" />
-                    {f.q}
-                  </h3>
-                  <p className="mt-2 pl-6 text-[14px] leading-relaxed text-plum">
-                    {f.a}
-                  </p>
-                </div>
-              ))}
-            </div>
+            ))}
           </div>
-        </Reveal>
+        </div>
+      </Reveal>
 
-        <Reveal delay={200} className="mt-12 text-center">
-          <a
-            href="https://wa.me/919876543210"
-            target="_blank"
-            rel="noreferrer"
-            className="btn-sheen inline-flex items-center gap-2 rounded-full bg-ink px-8 py-4 text-sm font-semibold tracking-wide text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-rose-700"
-          >
-            <MessageCircle className="h-4 w-4" />
-            Chat on WhatsApp
-            <ArrowRight className="h-4 w-4" />
-          </a>
-        </Reveal>
-      </div>
+      <Reveal delay={160} className="mt-10 text-center">
+        <a
+          href="https://wa.me/919876543210"
+          target="_blank"
+          rel="noreferrer"
+          className="btn-secondary"
+        >
+          <MessageCircle className="h-4 w-4" />
+          Chat on WhatsApp
+          <ArrowRight className="h-4 w-4" />
+        </a>
+      </Reveal>
+
+      <Reveal delay={200} className="mt-10">
+        <div className="flex items-center justify-center gap-2 text-[12px] text-ink-3">
+          <Truck className="h-3.5 w-3.5 text-accent" />
+          Same-day delivery on orders placed before 2 PM
+        </div>
+      </Reveal>
     </div>
   );
 }

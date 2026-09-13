@@ -17,15 +17,14 @@ export default async function OrderSuccessPage({
 
   if (!order) {
     return (
-      <div className="mx-auto max-w-2xl px-4 py-28 text-center">
-        <h1 className="font-display text-4xl text-ink">Order not found</h1>
-        <p className="mt-3 text-plum">
+      <div className="mx-auto max-w-md px-4 py-28 text-center">
+        <h1 className="font-display text-3xl font-bold tracking-tight text-ink">
+          Order not found
+        </h1>
+        <p className="mt-2 text-[14px] text-ink-2">
           We couldn&apos;t find that order — check the link or contact us.
         </p>
-        <Link
-          href="/shop"
-          className="btn-sheen mt-8 inline-flex items-center gap-2 rounded-full bg-rose-600 px-8 py-4 text-sm font-semibold tracking-wide text-white shadow-xl shadow-rose-600/30 transition hover:bg-rose-700"
-        >
+        <Link href="/shop" className="btn-primary mt-8">
           Back to Shop
           <ArrowRight className="h-4 w-4" />
         </Link>
@@ -34,34 +33,37 @@ export default async function OrderSuccessPage({
   }
 
   return (
-    <div className="relative mx-auto max-w-2xl px-4 py-16 sm:py-20">
-      <div className="pointer-events-none absolute -top-16 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-rose-100/60 blur-3xl" />
+    <div className="mx-auto max-w-xl px-4 py-16 sm:py-20">
       <Reveal>
-        <div className="relative overflow-hidden rounded-[2.5rem] border border-rose-100 bg-white p-9 text-center shadow-2xl shadow-rose-900/10 sm:p-12">
-          <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-rose-50 blur-2xl" />
-          <span className="relative mx-auto flex h-20 w-20 animate-pop-in items-center justify-center rounded-full bg-gradient-to-br from-sage-100 to-sage-200 text-sage-600 shadow-lg shadow-sage-600/20">
-            <CheckCircle2 className="h-10 w-10" />
-          </span>
-          <h1 className="relative mt-6 font-display text-4xl text-ink">
-            Thank you,{" "}
-            <span className="italic text-gradient">
-              {order.customer_name.split(" ")[0]}!
+        <div className="overflow-hidden rounded-2xl border border-line bg-surface">
+          <div className="border-b border-line bg-carbon px-8 py-10 text-center">
+            <span className="animate-pop-in mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-ok text-white">
+              <CheckCircle2 className="h-7 w-7" />
             </span>
-          </h1>
-          <p className="relative mt-3 text-[15px] leading-relaxed text-plum">
-            Your order is confirmed and we&apos;ve begun arranging your
-            flowers.
-          </p>
+            <h1 className="mt-5 font-display text-3xl font-bold tracking-tight text-white">
+              Order confirmed
+            </h1>
+            <p className="mt-1.5 text-[14px] text-white/60">
+              Thanks, {order.customer_name.split(" ")[0]} — we&apos;ve started
+              arranging your flowers.
+            </p>
+          </div>
 
-          <div className="relative mt-9 rounded-3xl border border-rose-100 bg-blush p-6 text-left">
-            <div className="flex items-center gap-2 text-sm font-semibold text-ink">
-              <Package className="h-4 w-4 text-rose-600" />
-              Order {order.order_number}
+          <div className="px-8 py-7">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm font-semibold text-ink">
+                <Package className="h-4 w-4 text-accent" />
+                {order.order_number}
+              </div>
+              <span className="rounded-md bg-ok-soft px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-ok">
+                {order.payment_status === "paid" ? "Paid" : "Pending"}
+              </span>
             </div>
-            <div className="mt-5 space-y-3.5">
+
+            <div className="mt-6 space-y-3">
               {order.items.map((item, i) => (
                 <div key={i} className="flex items-center gap-3">
-                  <div className="relative h-14 w-12 overflow-hidden rounded-xl bg-rose-100">
+                  <div className="relative h-14 w-12 shrink-0 overflow-hidden rounded-lg bg-surface-2">
                     {item.image_url && (
                       <Image
                         src={item.image_url}
@@ -72,21 +74,24 @@ export default async function OrderSuccessPage({
                       />
                     )}
                   </div>
-                  <span className="flex-1 text-[15px] text-ink">
+                  <span className="flex-1 text-[14px] text-ink">
                     {item.qty} × {item.name}
                   </span>
-                  <span className="text-[15px] font-medium text-plum">
+                  <span className="text-[14px] font-medium text-ink-2">
                     {formatINR(item.price * item.qty)}
                   </span>
                 </div>
               ))}
             </div>
-            <div className="mt-5 border-t border-rose-200/60 pt-5 text-[15px]">
-              <div className="flex justify-between text-plum">
+
+            <div className="hairline my-6" />
+
+            <div className="space-y-2 text-[14px]">
+              <div className="flex justify-between text-ink-2">
                 <span>Subtotal</span>
                 <span>{formatINR(order.subtotal)}</span>
               </div>
-              <div className="mt-1.5 flex justify-between text-plum">
+              <div className="flex justify-between text-ink-2">
                 <span>Delivery</span>
                 <span>
                   {order.delivery_fee === 0
@@ -94,25 +99,28 @@ export default async function OrderSuccessPage({
                     : formatINR(order.delivery_fee)}
                 </span>
               </div>
-              <div className="mt-3 flex justify-between font-display text-lg font-semibold text-ink">
-                <span>Paid</span>
+              <div className="flex justify-between font-display text-lg font-bold text-ink">
+                <span>Total</span>
                 <span>{formatINR(order.total)}</span>
               </div>
             </div>
-          </div>
 
-          <p className="relative mt-7 flex items-center justify-center gap-1.5 text-[13px] text-plum/80">
-            <Phone className="h-3.5 w-3.5 text-rose-600" />
-            Need changes? Call us at{" "}
-            <span className="font-semibold text-ink">+91 98765 43210</span>
-          </p>
-          <Link
-            href="/shop"
-            className="btn-sheen relative mt-8 inline-flex items-center gap-2 rounded-full bg-rose-600 px-8 py-4 text-sm font-semibold tracking-wide text-white shadow-xl shadow-rose-600/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-rose-700"
-          >
-            Continue Shopping
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+            <p className="mt-6 flex items-center justify-center gap-1.5 text-[12px] text-ink-3">
+              <Phone className="h-3.5 w-3.5 text-accent" />
+              Need changes? Call +91 98765 43210 ·{" "}
+              <Link
+                href="/account"
+                className="font-semibold text-accent hover:text-accent-strong"
+              >
+                Track in My Orders
+              </Link>
+            </p>
+
+            <Link href="/shop" className="btn-primary mt-6 w-full">
+              Continue Shopping
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
       </Reveal>
     </div>

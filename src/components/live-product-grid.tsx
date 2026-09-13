@@ -32,25 +32,25 @@ export function LiveProductGrid({
   return (
     <div>
       {categories.length > 0 && (
-        <div className="mb-10 flex flex-wrap justify-center gap-2">
+        <div className="mb-10 inline-flex flex-wrap gap-1 rounded-xl border border-line bg-surface p-1">
           <button
             onClick={() => setActiveCat("all")}
-            className={`rounded-full border px-5 py-2 text-sm font-medium transition-all duration-300 ${
+            className={`rounded-lg px-4 py-2 text-[13px] font-semibold transition-colors ${
               activeCat === "all"
-                ? "border-rose-600 bg-rose-600 text-white shadow-lg shadow-rose-600/30"
-                : "border-rose-200 bg-white text-plum hover:border-rose-400 hover:text-rose-700"
+                ? "bg-carbon text-white"
+                : "text-ink-2 hover:bg-surface-2 hover:text-ink"
             }`}
           >
-            All Flowers
+            All
           </button>
           {categories.map((c) => (
             <button
               key={c.id}
               onClick={() => setActiveCat(c.id)}
-              className={`rounded-full border px-5 py-2 text-sm font-medium transition-all duration-300 ${
+              className={`rounded-lg px-4 py-2 text-[13px] font-semibold transition-colors ${
                 activeCat === c.id
-                  ? "border-rose-600 bg-rose-600 text-white shadow-lg shadow-rose-600/30"
-                  : "border-rose-200 bg-white text-plum hover:border-rose-400 hover:text-rose-700"
+                  ? "bg-carbon text-white"
+                  : "text-ink-2 hover:bg-surface-2 hover:text-ink"
               }`}
             >
               {c.name}
@@ -59,27 +59,29 @@ export function LiveProductGrid({
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
         {filtered.map((p, i) => (
-          <Reveal key={p.id} delay={(i % 4) * 90}>
+          <Reveal key={p.id} delay={(i % 4) * 70}>
             <ProductCard product={p} />
           </Reveal>
         ))}
       </div>
 
       {filtered.length === 0 && (
-        <p className="py-16 text-center text-plum/70">
-          No flowers in this category yet — check back soon!
-        </p>
+        <div className="rounded-2xl border border-dashed border-line-strong px-6 py-16 text-center">
+          <p className="text-[15px] font-medium text-ink-2">
+            Nothing in this category right now.
+          </p>
+          <p className="mt-1 text-[13px] text-ink-3">
+            Live inventory refreshes automatically — check back soon.
+          </p>
+        </div>
       )}
 
       {limit && products.length > limit && (
         <div className="mt-12 text-center">
-          <Link
-            href="/shop"
-            className="btn-sheen inline-flex items-center gap-2 rounded-full border border-rose-300 bg-white px-7 py-3 text-sm font-semibold tracking-wide text-rose-700 transition hover:border-rose-500 hover:bg-rose-50"
-          >
-            View All Flowers
+          <Link href="/shop" className="btn-secondary">
+            View all flowers
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>

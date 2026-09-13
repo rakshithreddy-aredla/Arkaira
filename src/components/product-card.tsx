@@ -29,74 +29,76 @@ export function ProductCard({ product }: { product: Product }) {
         out ? "This item is out of stock" : "No more stock available",
         "error"
       );
-    setTimeout(() => setAdding(false), 350);
+    setTimeout(() => setAdding(false), 300);
   };
 
   return (
     <Link
       href={`/product/${product.id}`}
-      className="card-hover group block overflow-hidden rounded-3xl border border-rose-100 bg-white"
+      className="card-hover group block overflow-hidden rounded-2xl border border-line bg-surface"
     >
-      <div className="relative aspect-[4/5] overflow-hidden bg-rose-50">
+      <div className="relative aspect-[4/5] overflow-hidden bg-surface-2">
         {product.image_url ? (
           <Image
             src={product.image_url}
             alt={product.name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 300px"
-            className="object-cover transition duration-700 ease-out group-hover:scale-[1.07]"
+            className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05]"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-rose-300">
+          <div className="flex h-full items-center justify-center text-line-strong">
             <Flower2 className="h-10 w-10" />
           </div>
         )}
 
-        {/* hover gradient veil */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/25 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-
         <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5">
           {product.is_bestseller && (
-            <span className="rounded-full bg-rose-600/95 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white shadow-md shadow-rose-900/20 backdrop-blur-sm">
+            <span className="rounded-md bg-carbon px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-white">
               Bestseller
             </span>
           )}
           {discount && (
-            <span className="rounded-full bg-sage-600/95 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white shadow-md shadow-sage-900/20 backdrop-blur-sm">
+            <span className="rounded-md bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-white">
               {discount}% off
             </span>
           )}
         </div>
 
-        {out && (
-          <div className="absolute inset-0 flex items-center justify-center bg-cream/70 backdrop-blur-[3px]">
-            <span className="rounded-full bg-ink px-4 py-1.5 text-[13px] font-semibold text-white shadow-lg">
-              Out of Stock
+        {/* stock status */}
+        <div className="absolute bottom-3 left-3">
+          {out ? (
+            <span className="rounded-md bg-carbon px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white">
+              Sold out
             </span>
-          </div>
-        )}
-        {!out && product.stock <= 5 && (
-          <span className="absolute bottom-3 right-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold text-rose-700 shadow-md backdrop-blur-sm">
-            Only {product.stock} left
-          </span>
-        )}
+          ) : product.stock <= 5 ? (
+            <span className="rounded-md bg-surface px-2.5 py-1 text-[11px] font-bold text-accent shadow-sm">
+              {product.stock} left
+            </span>
+          ) : (
+            <span className="flex items-center gap-1.5 rounded-md bg-surface/90 px-2.5 py-1 text-[11px] font-semibold text-ink-2 shadow-sm backdrop-blur-sm">
+              <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-ok" />
+              In stock
+            </span>
+          )}
+        </div>
       </div>
 
-      <div className="p-4">
-        <h3 className="font-display text-[17px] leading-snug text-ink transition-colors group-hover:text-rose-700">
+      <div className="border-t border-line p-4">
+        <h3 className="font-display text-[16px] font-semibold leading-snug text-ink transition-colors group-hover:text-accent">
           {product.name}
         </h3>
-        <p className="mt-1 line-clamp-2 text-[13px] leading-relaxed text-plum/80">
+        <p className="mt-1 line-clamp-2 text-[13px] leading-relaxed text-ink-3">
           {product.description}
         </p>
         <div className="mt-3 flex items-center justify-between">
           <div className="flex items-baseline gap-1.5">
-            <span className="font-display text-xl font-semibold text-rose-700">
+            <span className="font-display text-lg font-bold text-ink">
               {formatINR(product.price)}
             </span>
             {product.compare_price &&
               product.compare_price > product.price && (
-                <span className="text-[13px] text-plum/50 line-through">
+                <span className="text-[12px] text-ink-3 line-through">
                   {formatINR(product.compare_price)}
                 </span>
               )}
@@ -105,15 +107,13 @@ export function ProductCard({ product }: { product: Product }) {
             onClick={handleAdd}
             disabled={out || adding}
             aria-label={`Add ${product.name} to cart`}
-            className={`btn-sheen flex h-10 w-10 items-center justify-center rounded-full transition-all duration-300 ${
+            className={`flex h-9 w-9 items-center justify-center rounded-lg transition-all duration-200 ${
               out
-                ? "cursor-not-allowed bg-rose-100 text-rose-300"
-                : "bg-rose-600 text-white shadow-lg shadow-rose-600/30 hover:bg-rose-700 hover:shadow-rose-700/40 active:scale-90"
+                ? "cursor-not-allowed bg-surface-2 text-ink-3"
+                : "bg-accent text-white hover:bg-accent-strong active:scale-90"
             }`}
           >
-            <ShoppingBag
-              className={`h-4.5 w-4.5 transition-transform ${adding ? "scale-75" : ""}`}
-            />
+            <ShoppingBag className="h-4 w-4" />
           </button>
         </div>
       </div>
