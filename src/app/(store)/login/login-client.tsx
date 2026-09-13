@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -9,10 +9,7 @@ import {
   Lock,
   Eye,
   EyeOff,
-  Smartphone,
-  KeyRound,
   ArrowLeft,
-  RefreshCw,
   Flower2,
   ShieldCheck,
   Truck,
@@ -22,9 +19,7 @@ import {
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { useToast } from "@/components/toast-provider";
 
-type Mode = "start" | "otp" | "password" | "signup" | "forgot";
-
-const otpLength = 6;
+type Mode = "start" | "password" | "signup";
 
 export function LoginClient() {
   const router = useRouter();
@@ -39,38 +34,25 @@ export function LoginClient() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [otp, setOtp] = useState<string[]>(Array(otpLength).fill(""));
-  const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(false);
-  const [resendCooldown, setResendCooldown] = useState(0);
-  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const cleanPhone = phone.replace(/\D/g, "").slice(-10);
   const validPhone = /^\d{10}$/.test(cleanPhone);
   const phoneE164 = `+91${cleanPhone}`;
 
-  // cooldown timer for OTP resend
-  useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const t = window.setTimeout(() => setResendCooldown((s) => s - 1), 1000);
-    return () => window.clearTimeout(t);
-  }, [resendCooldown]);
-
-  // focus first OTP box when entering otp mode
-  useEffect(() => {
-    if (mode === "otp" && otpSent) {
-      otpRefs.current[0]?.focus();
-    }
-  }, [mode, otpSent]);
-
   const redirectAfterLogin = () => {
     const next = searchParams.get("next");
-    if (next && next.startsWith("/") && !next.startsWith("//")) {
-      window.location.assign(next);
-    } else {
-      window.location.assign("/account");
-    }
+    const dest = next && next.startsWith("/") && !next.startsWith("//") ? next : "/account";
+    router.push(dest as "/account");
+    router.refresh();
+  };
+
+  const backToStart = () => {
+    setMode("start");
+    setPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
   };
 
   /* ---------- step 1: check the number ---------- */
@@ -88,11 +70,7 @@ export function LoginClient() {
       });
       if (!res.ok) throw new Error();
       const { exists } = (await res.json()) as { exists: boolean };
-      if (exists) {
-        setMode("password");
-      } else {
-        setMode("signup");
-      }
+      setMode(exists ? "password" : "signup");
     } catch {
       toast("Could not verify your number — please try again", "error");
     } finally {
@@ -106,20 +84,11 @@ export function LoginClient() {
     if (!password) return toast("Enter your password", "error");
     setLoading(true);
     try {
-      // Phone+password sign-in: try OTP-style verify first via phone param
       const { error } = await supabase.auth.signInWithPassword({
-        email: `${cleanPhone}@phone.arkaira.in`,
+        phone: phoneE164,
         password,
       });
-      if (error) {
-        // fallback: phone-based password login (Supabase supports phone sign-in
-        // with password when the account has one set)
-        const { error: phoneError } = await supabase.auth.signInWithPassword({
-          phone: phoneE164,
-          password,
-        } as { phone: string; password: string });
-        if (phoneError) throw error;
-      }
+      if (error) throw error;
       toast("Welcome back!");
       redirectAfterLogin();
     } catch {
@@ -139,153 +108,37 @@ export function LoginClient() {
 
     setLoading(true);
     try {
-      // Create the account with phone + password; Supabase sends an SMS OTP
-      // to verify the phone number. Email is synthesised from the phone for
-      // accounts that require an email field.
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         phone: phoneE164,
         password: newPassword,
-        options: {
-          data: { full_name: newName.trim() },
-        },
-      } as never);
-      if (error) throw error;
-
-      // verify phone via OTP if a session wasn't created immediately
-      setMode("otp");
-      setOtpSent(false);
-      toast("Account created — verify the OTP we just sent you");
-    } catch (err) {
-      toast(
-        err instanceof Error && err.message.includes("already")
-          ? "This number is already registered — try signing in"
-          : "Could not create your account — please try again",
-        "error"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /* ---------- send OTP ---------- */
-  const sendOtp = async () => {
-    if (!validPhone) return;
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
-        phone: phoneE164,
-        options: { shouldCreateUser: true },
+        options: { data: { full_name: newName.trim() } },
       });
       if (error) throw error;
-      setMode("otp");
-      setOtpSent(true);
-      setOtp(Array(otpLength).fill(""));
-      setResendCooldown(30);
-      toast("OTP sent to your phone");
-      setTimeout(() => otpRefs.current[0]?.focus(), 60);
-    } catch {
-      toast("Could not send OTP — check the number and try again", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  /* ---------- verify OTP ---------- */
-  const verifyOtp = async (code?: string) => {
-    const theOtp = (code ?? otp.join("")).replace(/\D/g, "");
-    if (theOtp.length !== otpLength)
-      return toast(`Enter all ${otpLength} digits of the OTP`, "error");
-
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.verifyOtp({
-        phone: phoneE164,
-        token: theOtp,
-        type: "sms",
-      });
-      if (error) throw error;
-      toast("Verified — you're signed in!");
-      redirectAfterLogin();
-    } catch {
-      toast("That OTP didn't match — check and try again", "error");
-      setLoading(false);
-    }
-  };
-
-  /* ---------- reset (forgot) password ---------- */
-  const requestReset = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newPassword.length < 6)
-      return toast("New password must be at least 6 characters", "error");
-    setLoading(true);
-    try {
-      // Supabase has no SMS reset link; we verify identity by OTP then
-      // update the password on the now-authenticated session.
-      const { error: verifyError } = await supabase.auth.verifyOtp({
-        phone: phoneE164,
-        token: otp.join(""),
-        type: "sms",
-      });
-      if (verifyError) throw new Error("NO_OTP");
-
-      const { error: updateError } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
-      if (updateError) throw updateError;
-      toast("Password updated — you're signed in!");
-      redirectAfterLogin();
-    } catch (err) {
-      if (err instanceof Error && err.message === "NO_OTP") {
-        toast("Verify the OTP first", "error");
+      if (data.session) {
+        toast("Welcome to Arkaira!");
+        redirectAfterLogin();
       } else {
-        toast("Could not update password — please try again", "error");
+        // phone confirmation enabled in Supabase — account created but
+        // needs verification before first sign-in
+        toast("Account created — sign in with your password");
+        setPassword("");
+        setMode("password");
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "";
+      if (msg.toLowerCase().includes("already")) {
+        toast("This number is already registered — sign in instead", "error");
+        setMode("password");
+      } else if (/sms|twilio|provider/i.test(msg)) {
+        toast(
+          "Phone signup isn't configured yet — please contact support",
+          "error"
+        );
+      } else {
+        toast("Could not create your account — please try again", "error");
       }
       setLoading(false);
-    }
-  };
-
-  /* ---------- OTP input handling ---------- */
-  const handleOtpChange = (idx: number, raw: string) => {
-    const digit = raw.replace(/\D/g, "").slice(-1);
-    setOtp((prev) => {
-      const next = [...prev];
-      next[idx] = digit;
-      return next;
-    });
-    if (digit && idx < otpLength - 1) {
-      otpRefs.current[idx + 1]?.focus();
-    }
-    // auto-submit when all filled
-    const joined = [...otp];
-    joined[idx] = digit;
-    if (digit && joined.every((d) => d !== "")) {
-      verifyOtp(joined.join(""));
-    }
-  };
-
-  const handleOtpKeyDown = (
-    idx: number,
-    e: React.KeyboardEvent<HTMLInputElement>
-  ) => {
-    if (e.key === "Backspace" && !otp[idx] && idx > 0) {
-      otpRefs.current[idx - 1]?.focus();
-      setOtp((prev) => {
-        const next = [...prev];
-        next[idx - 1] = "";
-        return next;
-      });
-    }
-    if (e.key === "Enter") verifyOtp();
-  };
-
-  const handleOtpPaste = (
-    e: React.ClipboardEvent<HTMLInputElement>
-  ) => {
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "");
-    if (pasted.length === otpLength) {
-      e.preventDefault();
-      setOtp(pasted.split(""));
-      verifyOtp(pasted);
     }
   };
 
@@ -296,14 +149,7 @@ export function LoginClient() {
       {/* back */}
       {mode !== "start" && (
         <button
-          onClick={() => {
-            setMode("start");
-            setPassword("");
-            setOtp(Array(otpLength).fill(""));
-            setOtpSent(false);
-            setNewPassword("");
-            setConfirmPassword("");
-          }}
+          onClick={backToStart}
           className="mb-5 inline-flex items-center gap-1.5 text-[13px] font-medium text-plum/70 transition hover:text-rose-600"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Use a different number
@@ -314,32 +160,22 @@ export function LoginClient() {
         {/* heading varies by mode */}
         <div className="flex items-center gap-3">
           <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-rose-700 text-white shadow-lg shadow-rose-600/30">
-            {mode === "otp" ? (
-              <Smartphone className="h-5 w-5" />
-            ) : mode === "signup" ? (
+            {mode === "signup" ? (
               <Sparkles className="h-5 w-5" />
-            ) : mode === "forgot" ? (
-              <KeyRound className="h-5 w-5" />
             ) : (
               <Lock className="h-5 w-5" />
             )}
           </span>
           <div>
             <h1 className="font-display text-[26px] leading-tight text-ink">
-              {mode === "start" && "Welcome back"}
+              {mode === "start" && "Welcome"}
               {mode === "password" && "Sign in"}
-              {mode === "otp" && "Verify your phone"}
               {mode === "signup" && "Create your account"}
-              {mode === "forgot" && "Reset password"}
             </h1>
             <p className="mt-0.5 text-[13px] text-plum/80">
               {mode === "start" && "Login or sign up with your phone number"}
               {mode === "password" && `Signing in as +91 ${cleanPhone}`}
-              {mode === "otp" &&
-                `We sent a 6-digit code to +91 ${cleanPhone}`}
-              {mode === "signup" &&
-                `Join Arkaira with +91 ${cleanPhone}`}
-              {mode === "forgot" && `Verify OTP & set a new password`}
+              {mode === "signup" && `Join Arkaira with +91 ${cleanPhone}`}
             </p>
           </div>
         </div>
@@ -390,37 +226,16 @@ export function LoginClient() {
               )}
             </button>
 
-            <div className="mt-7 flex items-center gap-4">
-              <div className="petal-divider flex-1" />
-              <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/50">
-                or
-              </span>
-              <div className="petal-divider flex-1" />
-            </div>
-
-            <button
-              onClick={() => {
-                if (!validPhone) {
-                  toast("Enter your phone number first", "error");
-                  return;
-                }
-                sendOtp();
-              }}
-              disabled={!validPhone || loading}
-              className="mt-6 flex w-full items-center justify-center gap-2 rounded-full border border-rose-300 bg-white py-4 text-sm font-semibold tracking-wide text-rose-700 transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-500 hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <Smartphone className="h-4 w-4" />
-              Login with OTP instead
-            </button>
+            <p className="mt-6 flex items-center justify-center gap-1.5 text-[12px] text-plum/60">
+              <ShieldCheck className="h-3.5 w-3.5 text-sage-600" />
+              Your number is never shared with anyone
+            </p>
           </div>
         )}
 
         {/* ---------- MODE: PASSWORD ---------- */}
         {mode === "password" && (
-          <form
-            onSubmit={loginWithPassword}
-            className="animate-fade-in"
-          >
+          <form onSubmit={loginWithPassword} className="animate-fade-in">
             <label className="label" htmlFor="login-password">
               Password
             </label>
@@ -448,26 +263,18 @@ export function LoginClient() {
               </button>
             </div>
 
-            <div className="mt-4 flex items-center justify-between">
-              <button
-                type="button"
-                onClick={() => {
-                  setMode("forgot");
-                  setOtpSent(false);
-                  setOtp(Array(otpLength).fill(""));
-                }}
-                className="text-[13px] font-medium text-rose-600 transition hover:text-rose-700"
-              >
-                Forgot password?
-              </button>
-              <button
-                type="button"
-                onClick={sendOtp}
-                className="text-[13px] font-medium text-plum/70 transition hover:text-rose-600"
-              >
-                Use OTP instead
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() =>
+                toast(
+                  "To reset your password, WhatsApp us at +91 98765 43210",
+                  "info"
+                )
+              }
+              className="mt-4 text-[13px] font-medium text-rose-600 transition hover:text-rose-700"
+            >
+              Forgot password?
+            </button>
 
             <button
               type="submit"
@@ -485,65 +292,6 @@ export function LoginClient() {
               )}
             </button>
           </form>
-        )}
-
-        {/* ---------- MODE: OTP ---------- */}
-        {mode === "otp" && (
-          <div className="animate-fade-in">
-            <div className="flex justify-between gap-2.5">
-              {otp.map((d, i) => (
-                <input
-                  key={i}
-                  ref={(el) => {
-                    otpRefs.current[i] = el;
-                  }}
-                  className={`otp-box ${d ? "filled" : ""}`}
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  maxLength={i === 0 ? otpLength : 1}
-                  value={d}
-                  onChange={(e) => handleOtpChange(i, e.target.value)}
-                  onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                  onPaste={handleOtpPaste}
-                  aria-label={`OTP digit ${i + 1}`}
-                />
-              ))}
-            </div>
-
-            <button
-              onClick={() => verifyOtp()}
-              disabled={loading}
-              className="btn-sheen mt-7 flex w-full items-center justify-center gap-2 rounded-full bg-rose-600 py-4 text-sm font-semibold tracking-wide text-white shadow-xl shadow-rose-600/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-plum/30 disabled:shadow-none"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" /> Verifying…
-                </>
-              ) : (
-                <>
-                  <ShieldCheck className="h-4 w-4" /> Verify &amp; Sign In
-                </>
-              )}
-            </button>
-
-            <div className="mt-5 text-center">
-              {resendCooldown > 0 ? (
-                <p className="text-[13px] text-plum/60">
-                  Resend code in{" "}
-                  <span className="font-semibold text-rose-600">
-                    0:{String(resendCooldown).padStart(2, "0")}
-                  </span>
-                </p>
-              ) : (
-                <button
-                  onClick={sendOtp}
-                  className="inline-flex items-center gap-1.5 text-[13px] font-medium text-rose-600 transition hover:text-rose-700"
-                >
-                  <RefreshCw className="h-3.5 w-3.5" /> Resend OTP
-                </button>
-              )}
-            </div>
-          </div>
         )}
 
         {/* ---------- MODE: SIGNUP ---------- */}
@@ -621,91 +369,10 @@ export function LoginClient() {
               )}
             </button>
             <p className="mt-4 text-center text-[11px] leading-relaxed text-plum/60">
-              We&apos;ll text you a 6-digit code to verify this number.
+              You&apos;ll use this phone number and password to sign in and
+              track orders.
             </p>
           </form>
-        )}
-
-        {/* ---------- MODE: FORGOT ---------- */}
-        {mode === "forgot" && (
-          <div className="animate-fade-in">
-            {!otpSent ? (
-              <div>
-                <p className="text-[14px] leading-relaxed text-plum">
-                  We&apos;ll send a 6-digit code to{" "}
-                  <span className="font-semibold text-ink">
-                    +91 {cleanPhone}
-                  </span>{" "}
-                  to verify it&apos;s really you.
-                </p>
-                <button
-                  onClick={sendOtp}
-                  disabled={loading}
-                  className="btn-sheen mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-rose-600 py-4 text-sm font-semibold tracking-wide text-white shadow-xl shadow-rose-600/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-plum/30 disabled:shadow-none"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" /> Sending…
-                    </>
-                  ) : (
-                    <>
-                      <Smartphone className="h-4 w-4" /> Send verification code
-                    </>
-                  )}
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={requestReset}>
-                <div className="flex justify-between gap-2.5">
-                  {otp.map((d, i) => (
-                    <input
-                      key={i}
-                      ref={(el) => {
-                        otpRefs.current[i] = el;
-                      }}
-                      className={`otp-box ${d ? "filled" : ""}`}
-                      inputMode="numeric"
-                      maxLength={i === 0 ? otpLength : 1}
-                      value={d}
-                      onChange={(e) => handleOtpChange(i, e.target.value)}
-                      onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                      onPaste={handleOtpPaste}
-                      aria-label={`OTP digit ${i + 1}`}
-                    />
-                  ))}
-                </div>
-                <div className="mt-6">
-                  <label className="label" htmlFor="reset-password">
-                    New Password
-                  </label>
-                  <input
-                    id="reset-password"
-                    className="field"
-                    type="password"
-                    placeholder="At least 6 characters"
-                    autoComplete="new-password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="btn-sheen mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-rose-600 py-4 text-sm font-semibold tracking-wide text-white shadow-xl shadow-rose-600/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-plum/30 disabled:shadow-none"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" /> Updating…
-                    </>
-                  ) : (
-                    <>
-                      <KeyRound className="h-4 w-4" /> Set new password
-                    </>
-                  )}
-                </button>
-              </form>
-            )}
-          </div>
         )}
 
         <p className="mt-7 text-center text-[12px] leading-relaxed text-plum/60">
@@ -714,20 +381,34 @@ export function LoginClient() {
       </div>
 
       <p className="mt-6 text-center text-[13px] text-plum/70">
-        New here?{" "}
-        <button
-          onClick={() => setMode("signup")}
-          className="font-semibold text-rose-600 transition hover:text-rose-700"
-        >
-          Create an account
-        </button>{" "}
-        · Store owner?{" "}
-        <Link
-          href="/admin/login"
-          className="font-semibold text-rose-600 transition hover:text-rose-700"
-        >
-          Admin login
-        </Link>
+        {mode === "signup" ? (
+          <>
+            Already have an account?{" "}
+            <button
+              onClick={() => setMode("start")}
+              className="font-semibold text-rose-600 transition hover:text-rose-700"
+            >
+              Sign in
+            </button>
+          </>
+        ) : (
+          <>
+            New here?{" "}
+            <button
+              onClick={() => setMode("signup")}
+              className="font-semibold text-rose-600 transition hover:text-rose-700"
+            >
+              Create an account
+            </button>{" "}
+            · Store owner?{" "}
+            <Link
+              href="/admin/login"
+              className="font-semibold text-rose-600 transition hover:text-rose-700"
+            >
+              Admin login
+            </Link>
+          </>
+        )}
       </p>
     </div>
   );
@@ -776,8 +457,8 @@ export function LoginClient() {
                 },
                 {
                   icon: ShieldCheck,
-                  title: "Secure OTP login",
-                  text: "No passwords to remember — or use one, your choice",
+                  title: "Secure phone login",
+                  text: "One number, one password — no OTPs to juggle",
                 },
                 {
                   icon: Flower2,
